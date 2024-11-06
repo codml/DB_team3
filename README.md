@@ -2,4 +2,4 @@
 
 ---
 
-### 실행 명령어 : frontend 폴터에서 npm run serve 또는 yarn serve
+#### 실행 명령어 : frontend 폴더에서 npm run serve 또는 yarn serve
