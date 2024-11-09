@@ -2,8 +2,13 @@
   <div class = "main">
     <router-link to="/main">광운 마켓</router-link>
   </div>
-  <div class="login">
-    <router-link to="/login">로그인 | 회원가입</router-link>
+  <div class="account">
+    <div class="login">
+      <router-link to="/login">로그인</router-link>
+    </div>
+    <div calss="signup">
+      <router-link to="/signup">회원가입</router-link>
+    </div>
   </div>
   <nav>
     <router-link to="/search">상품 검색</router-link>
@@ -23,21 +28,34 @@
   color: #2c3e50;
 }
 
+div.main {
+  margin-top: 30px;
+}
+
 div.main a {
   font-size: 50px;
   font-weight: bold;
   text-decoration: none;
   color: #2c3e50;
-  padding-top: 50px;
 }
 
-div.login a {
-  font-size: 12px;
-  font-weight: bold;
-  text-decoration: none;
-  float: right;
-  margin-right: 300px;
+div.main a.router-link-exact-active {
   color: #2c3e50;
+}
+
+div.account {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-right: 300px;
+}
+
+
+div.account a {
+  font-weight: bold;
+  color: #2c3e50;
+  text-decoration: none;
 }
 
 div a.router-link-exact-active {
@@ -45,7 +63,7 @@ div a.router-link-exact-active {
 }
 
 nav {
-  margin: 30px;
+  margin-top: 10px;
   border-style: solid;
   border-color: black;
   border-radius: 10px;
@@ -54,15 +72,20 @@ nav {
   width: 1000px;
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 nav a {
   font-size: 30px;
   font-weight: bold;
   text-decoration: none;
-  padding: 45px;
   color: #2c3e50;
+  flex: 1;
+  text-align: center;
 }
+
 
 nav a.router-link-exact-active {
   color: #42b983;
