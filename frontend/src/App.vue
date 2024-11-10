@@ -1,23 +1,37 @@
 <template>
-  <div class = "main">
+  <div class="main">
     <router-link to="/main">광운 마켓</router-link>
   </div>
-  <div class="account">
+
+  <div v-if="!isAuthPage" class="account">
     <div class="login">
       <router-link to="/login">로그인</router-link>
     </div>
-    <div calss="signup">
+    <div class="signup">
       <router-link to="/signup">회원가입</router-link>
     </div>
   </div>
-  <nav>
+
+  <nav v-if="!isAuthPage">
     <router-link to="/search">상품 검색</router-link>
     <router-link to="/regist">상품 등록</router-link>
     <router-link to="/price">시세 조회</router-link>
     <router-link to="/board">자유게시판</router-link>
   </nav>
-  <router-view/>
+
+  <router-view />
 </template>
+
+<script>
+export default {
+  computed: {
+    isAuthPage() {
+      return this.$route.path === '/login' || this.$route.path === '/signup';
+    }
+  }
+}
+</script>
+
 
 <style>
 #app {
@@ -28,12 +42,8 @@
   color: #2c3e50;
 }
 
-div.main {
-  margin-top: 30px;
-}
-
 div.main a {
-  font-size: 50px;
+  font-size: 45px;
   font-weight: bold;
   text-decoration: none;
   color: #2c3e50;
@@ -50,7 +60,6 @@ div.account {
   justify-content: flex-end;
   margin-right: 300px;
 }
-
 
 div.account a {
   font-weight: bold;
