@@ -8,7 +8,6 @@
     <div class="form-group row">
       <label for="photos">사진</label>
       <div class="photo-upload">
-        <p>대표 사진 1개, 추가 사진 2개. 총 3개까지 업로드 가능합니다.</p>
         <input type="file" id="photos" accept="image/*" multiple />
       </div>
     </div>
@@ -58,11 +57,63 @@ export default {
   name: 'FormComponent',
   data() {
     return {
+      title: '',
+      photos: [],
+      price: '',
+      description: '',
       isDirectTrade: false,
+      isDeliveryTrade: false,
+      location: '',
+      tags: '',
+      maxPhotos: 3, // 최대 업로드 가능 개수
     };
+  },
+  methods: {
+    handleFileUpload(event) {
+      const files = Array.from(event.target.files);
+      const validFiles = files.filter(file => file.type.startsWith('image/'));
+      
+      if (validFiles.length + this.photos.length > this.maxPhotos) {
+        alert(`사진은 최대 ${this.maxPhotos}개까지 업로드 가능합니다.`);
+        return;
+      }
+
+      this.photos = [...this.photos, ...validFiles].slice(0, this.maxPhotos);
+    },
+    submitForm() {
+      if (this.photos.length === 0) {
+        alert('최소 1장의 사진을 업로드해야 합니다.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('title', this.title);
+      formData.append('price', this.price);
+      formData.append('description', this.description);
+      formData.append('isDirectTrade', this.isDirectTrade);
+      formData.append('isDeliveryTrade', this.isDeliveryTrade);
+      formData.append('location', this.location);
+      formData.append('tags', this.tags);
+      
+      this.photos.forEach((photo, index) => {
+        formData.append(`photo${index + 1}`, photo);
+      });
+
+      // 서버로의 전송 예시 (axios 사용 가능)
+      // axios.post('/upload', formData)
+      //   .then(response => {
+      //     alert('등록 성공!');
+      //   })
+      //   .catch(error => {
+      //     alert('등록 실패');
+      //   });
+      
+      console.log('Form submitted with data:', formData); // 콘솔로 데이터 확인
+    },
   },
 };
 </script>
+
 
 <style scoped>
 .form-container {
