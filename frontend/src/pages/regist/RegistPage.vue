@@ -13,11 +13,12 @@
         <!-- 사용자 정의 버튼 -->
         <button type="button" @click="triggerFileInput">파일 선택</button>
         <div class="photo-previews">
-          <div v-for="(photo, index) in photos" :key="index" class="photo-item">
-            <img :src="photo.preview" alt="미리보기 이미지" class="preview-image" />
-            <button type="button" @click="handleFileDelete(index)">삭제</button>
-          </div>
-        </div>
+  <div v-for="(preview, index) in previews" :key="index" class="photo-item">
+    <img :src="preview" alt="미리보기 이미지" class="preview-image" />
+    <button type="button" @click="handleFileDelete(index)">삭제</button>
+  </div>
+</div>
+
       </div>
     </div>
 
@@ -67,7 +68,8 @@ export default {
   data() {
     return {
       title: '',
-      photos: [], // { file: File, preview: string } 형태의 객체를 저장
+      photos: [], // 파일 객체만 저장
+      previews: [], // 미리보기 URL만 저장
       price: '',
       description: '',
       isDirectTrade: false,
@@ -78,117 +80,113 @@ export default {
     };
   },
   methods: {
-  handleFileUpload(event) {
-    const files = Array.from(event.target.files);
-    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    handleFileUpload(event) {
+      const files = Array.from(event.target.files);
+      const validFiles = files.filter(file => file.type.startsWith('image/'));
 
-    // 현재 선택된 파일 개수 + 새로 추가될 파일 개수가 maxPhotos를 초과하지 않도록 설정
-    const availableSlots = this.maxPhotos - this.photos.length;
-    if (validFiles.length > availableSlots) {
-      alert(`사진은 최대 ${this.maxPhotos}개까지 업로드 가능합니다.`);
-      return;
-    }
+      const availableSlots = this.maxPhotos - this.photos.length;
+      if (validFiles.length > availableSlots) {
+        alert(`사진은 최대 ${this.maxPhotos}개까지 업로드 가능합니다.`);
+        return;
+      }
 
-    // 새로운 파일들을 추가
-    validFiles.slice(0, availableSlots).forEach(file => {
-      const preview = URL.createObjectURL(file);
-      this.photos.push({ file, preview });
-    });
-  },
-  triggerFileInput() {
-    this.$refs.fileInput.click();
-  },
-  handleFileDelete(index) {
-    // 미리보기 URL 해제
-    URL.revokeObjectURL(this.photos[index].preview);
-    // 선택된 파일을 배열에서 삭제
-    this.photos.splice(index, 1);
-  },
-  submitForm() {
-    // 필수 필드 검증
-    if (!this.title.trim()) {
-      alert('제목을 입력해주세요.');
-      return;
-    }
-    if (this.photos.length === 0) {
-      alert('최소 1장의 사진을 업로드해야 합니다.');
-      return;
-    }
-    if (!this.price.trim()) {
-      alert('가격을 입력해주세요.');
-      return;
-    }
-    if (!this.description.trim()) {
-      alert('설명을 입력해주세요.');
-      return;
-    }
-    // 거래 방식 검증: 직거래 또는 택배거래 중 하나는 반드시 선택
-    if (!this.isDirectTrade && !this.isDeliveryTrade) {
-      alert('직거래 또는 택배거래 중 하나를 선택해주세요.');
-      return;
-    }
-    if (this.isDirectTrade && !this.location.trim()) {
-      alert('직거래 선택 시 거래 희망 장소를 입력해주세요.');
-      return;
-    }
-
-    // FormData 객체로 데이터 준비
-    const formData = new FormData();
-    formData.append('title', this.title);
-    formData.append('price', this.price);
-    formData.append('description', this.description);
-    formData.append('isDirectTrade', this.isDirectTrade);
-    formData.append('isDeliveryTrade', this.isDeliveryTrade);
-    formData.append('location', this.location);
-    formData.append('tags', this.tags);
-    
-    this.photos.forEach((photo, index) => {
-      formData.append(`photo${index + 1}`, photo.file);
-    });
-
-    // 서버로의 데이터 전송 (주석 처리)
-    /*
-    axios.post('/upload', formData)
-      .then(response => {
-        alert('등록 성공!');
-        this.resetForm();
-      })
-      .catch(error => {
-        alert('등록 실패. 다시 시도해주세요.');
-        console.error(error);
+      validFiles.slice(0, availableSlots).forEach(file => {
+        const preview = URL.createObjectURL(file);
+        this.photos.push(file); // 파일 객체만 저장
+        this.previews.push(preview); // 미리보기 URL만 저장
       });
-    */
+    },
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    handleFileDelete(index) {
+      URL.revokeObjectURL(this.previews[index]); // 미리보기 URL 해제
+      this.photos.splice(index, 1); // 파일 삭제
+      this.previews.splice(index, 1); // 미리보기 URL 삭제
+    },
+    submitForm() {
+      // 필수 필드 검증
+      if (!this.title.trim()) {
+        alert('제목을 입력해주세요.');
+        return;
+      }
+      if (this.photos.length === 0) {
+        alert('최소 1장의 사진을 업로드해야 합니다.');
+        return;
+      }
+      if (!this.price.trim()) {
+        alert('가격을 입력해주세요.');
+        return;
+      }
+      if (!this.description.trim()) {
+        alert('설명을 입력해주세요.');
+        return;
+      }
+      if (!this.isDirectTrade && !this.isDeliveryTrade) {
+        alert('직거래 또는 택배거래 중 하나를 선택해주세요.');
+        return;
+      }
+      if (this.isDirectTrade && !this.location.trim()) {
+        alert('직거래 선택 시 거래 희망 장소를 입력해주세요.');
+        return;
+      }
 
-    // 콘솔에 데이터 출력
-    console.log('Form Data:', {
-      title: this.title,
-      price: this.price,
-      description: this.description,
-      isDirectTrade: this.isDirectTrade,
-      isDeliveryTrade: this.isDeliveryTrade,
-      location: this.location,
-      tags: this.tags,
-      photos: this.photos,
-    });
+      // FormData 객체로 데이터 준비
+      const formData = new FormData();
+      formData.append('title', this.title);
+      formData.append('price', this.price);
+      formData.append('description', this.description);
+      formData.append('isDirectTrade', this.isDirectTrade);
+      formData.append('isDeliveryTrade', this.isDeliveryTrade);
+      formData.append('location', this.location);
+      formData.append('tags', this.tags);
+      
+      this.photos.forEach((file, index) => {
+        formData.append(`photo${index + 1}`, file); // 파일만 추가
+      });
 
-    // 입력 필드 초기화
-    this.resetForm();
+      // 서버로의 데이터 전송 (주석 처리)
+      /*
+      axios.post('/upload', formData)
+        .then(response => {
+          alert('등록 성공!');
+          this.resetForm();
+        })
+        .catch(error => {
+          alert('등록 실패. 다시 시도해주세요.');
+          console.error(error);
+        });
+      */
+
+      console.log('Form Data:', {
+        title: this.title,
+        price: this.price,
+        description: this.description,
+        isDirectTrade: this.isDirectTrade,
+        isDeliveryTrade: this.isDeliveryTrade,
+        location: this.location,
+        tags: this.tags,
+        photos: this.photos,
+      });
+
+      // 입력 필드 초기화
+      this.resetForm();
+    },
+    resetForm() {
+      this.title = '';
+      this.photos = [];
+      this.previews.forEach(preview => URL.revokeObjectURL(preview)); // 모든 미리보기 URL 해제
+      this.previews = [];
+      this.price = '';
+      this.description = '';
+      this.isDirectTrade = false;
+      this.isDeliveryTrade = false;
+      this.location = '';
+      this.tags = '';
+    },
   },
-  resetForm() {
-    this.title = '';
-    // 모든 미리보기 URL 해제 후 초기화
-    this.photos.forEach(photo => URL.revokeObjectURL(photo.preview));
-    this.photos = [];
-    this.price = '';
-    this.description = '';
-    this.isDirectTrade = false;
-    this.isDeliveryTrade = false;
-    this.location = '';
-    this.tags = '';
-  },
-},
-
 };
+
 </script>
 
 
