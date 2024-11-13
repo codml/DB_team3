@@ -2,24 +2,24 @@
   <div class="form-container">
     <div class="form-group row">
       <label for="title">제목</label>
-      <input type="text" id="title" placeholder="제목을 입력하세요" />
+      <input type="text" id="title" placeholder="제목을 입력하세요" v-model="title" />
     </div>
 
     <div class="form-group row">
       <label for="photos">사진</label>
       <div class="photo-upload">
-        <input type="file" id="photos" accept="image/*" multiple />
+        <input type="file" id="photos" accept="image/*" multiple @change="handleFileUpload" />
       </div>
     </div>
 
     <div class="form-group row">
       <label for="price">가격</label>
-      <input type="text" id="price" placeholder="가격을 입력하세요" />
+      <input type="text" id="price" placeholder="가격을 입력하세요" v-model="price" />
     </div>
 
     <div class="form-group row description-group">
       <label for="description">설명</label>
-      <textarea id="description" placeholder="판매하실 상품의 설명을 적어주세요."></textarea>
+      <textarea id="description" placeholder="판매하실 상품의 설명을 적어주세요" v-model="description"></textarea>
     </div>
 
     <div class="form-group row">
@@ -27,7 +27,7 @@
       <div class="trade-options">
         <input type="checkbox" id="direct" v-model="isDirectTrade" />
         <label for="direct">직거래</label>
-        <input type="checkbox" id="delivery" />
+        <input type="checkbox" id="delivery" v-model="isDeliveryTrade" />
         <label for="delivery">택배거래</label>
       </div>
     </div>
@@ -35,19 +35,19 @@
     <div v-if="isDirectTrade" class="form-group row">
       <label for="location">거래희망장소</label>
       <div class="location-select">
-        <input type="text" id="location" placeholder="거래희망장소를 입력해주세요" />
+        <input type="text" id="location" placeholder="거래희망장소를 입력해주세요" v-model="location" />
       </div>
     </div>
 
     <div class="form-group row">
       <label for="tags">태그</label>
       <div class="tags-select">
-        <input type="text" id="tags" placeholder="태그를 입력해주세요" />
+        <input type="text" id="tags" placeholder="태그를 입력해주세요" v-model="tags" />
       </div>
     </div>
 
     <div class="form-actions">
-      <button class="register">등록하기</button>
+      <button class="register" @click="submitForm">등록하기</button>
     </div>
   </div>
 </template>
@@ -81,11 +81,29 @@ export default {
       this.photos = [...this.photos, ...validFiles].slice(0, this.maxPhotos);
     },
     submitForm() {
+      // 필수 필드 검증
+      if (!this.title.trim()) {
+        alert('제목을 입력해주세요.');
+        return;
+      }
       if (this.photos.length === 0) {
         alert('최소 1장의 사진을 업로드해야 합니다.');
         return;
       }
+      if (!this.price.trim()) {
+        alert('가격을 입력해주세요.');
+        return;
+      }
+      if (!this.description.trim()) {
+        alert('설명을 입력해주세요.');
+        return;
+      }
+      if (this.isDirectTrade && !this.location.trim()) {
+        alert('직거래 선택 시 거래 희망 장소를 입력해주세요.');
+        return;
+      }
 
+      // FormData 객체로 데이터 준비
       const formData = new FormData();
       formData.append('title', this.title);
       formData.append('price', this.price);
@@ -99,20 +117,49 @@ export default {
         formData.append(`photo${index + 1}`, photo);
       });
 
-      // 서버로의 전송 예시 (axios 사용 가능)
-      // axios.post('/upload', formData)
-      //   .then(response => {
-      //     alert('등록 성공!');
-      //   })
-      //   .catch(error => {
-      //     alert('등록 실패');
-      //   });
-      
-      console.log('Form submitted with data:', formData); // 콘솔로 데이터 확인
+      // 서버로의 데이터 전송 (주석 처리)
+      /*
+      axios.post('/upload', formData)
+        .then(response => {
+          alert('등록 성공!');
+          this.resetForm();
+        })
+        .catch(error => {
+          alert('등록 실패. 다시 시도해주세요.');
+          console.error(error);
+        });
+      */
+
+      // 콘솔에 데이터 출력
+      console.log('Form Data:', {
+        title: this.title,
+        price: this.price,
+        description: this.description,
+        isDirectTrade: this.isDirectTrade,
+        isDeliveryTrade: this.isDeliveryTrade,
+        location: this.location,
+        tags: this.tags,
+        photos: this.photos,
+      });
+
+      // 입력 필드 초기화
+      this.resetForm();
+    },
+    resetForm() {
+      this.title = '';
+      this.photos = [];
+      this.price = '';
+      this.description = '';
+      this.isDirectTrade = false;
+      this.isDeliveryTrade = false;
+      this.location = '';
+      this.tags = '';
     },
   },
 };
 </script>
+
+
 
 
 <style scoped>
@@ -156,7 +203,7 @@ textarea {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  margin-left: 10px;
+  margin-left: 20px;
 }
 
 .photo-upload {
