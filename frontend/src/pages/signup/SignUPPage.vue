@@ -1,72 +1,90 @@
 <template>
   <div class="signup">
     <h1>회원가입</h1>
-    <form id="myForm">
+    <form @submit.prevent="handleSubmit">
       <div class="input1">
          <label for="input1">이름</label><br>
-         <input id="input1" name="name" type="text" required/>
+         <input v-model="form.name" id="input1" name="name" type="text" required/>
       </div>
       <div class="input2">
          <label for="input2">나이</label><br>
-         <input id="input2" name="age" type="text" required/>
+         <input v-model="form.age" id="input2" name="age" type="number" min="0" max="200" required/>
       </div>
       <div class="input3">
          <label>성별</label><br>
-         <input id="male" name="gender" type="radio" value="남" checked/>
+         <input v-model="form.gender" id="male" name="gender" type="radio" value="남" checked/>
          <label for="male">남</label>
-         <input id="female" name="gender" type="radio" value="여" />
+         <input v-model="form.gender" id="female" name="gender" type="radio" value="여"/>
          <label for="female">여</label>
       </div>
       <div class="input4">
          <label for="input4">전화번호</label><br>
-         <input id="input4" name="tel" type="text" required/>
+         <input v-model="form.tel" id="input4" name="tel" type="text" required/>
       </div>
       <div class="input5">
          <label for="input5">이메일</label><br>
-         <input id="input5" name="email" type="text" required/>
+         <input v-model="form.email" id="input5" name="email" type="text" required/>
       </div>
       <div class="input6">
          <label for="input6">주소</label><br>
-         <input id="input6" name="address" type="text" required/>
+         <input v-model="form.address" id="input6" name="address" type="text" required/>
       </div>
       <div class="input7">
          <label for="input7">아이디</label><br>
-         <input id="input7" name="id" type="text" required/>
+         <input v-model="form.id" id="input7" name="id" type="text" required/>
       </div>
-         <div class="input8">
+      <div class="input8">
          <label for="input8">비밀번호</label><br>
-         <input id="input8" name="passwd" type="text" required/>
+         <input v-model="form.passwd" id="input8" name="passwd" type="text" required/>
       </div><br>
       <button id="btn_signup">회원가입</button>
-    </form>    
+    </form>
   </div>
 </template>
 
 <script>
-	// FormData 객체로 폼 데이터 가져오기
-	// Axios를 사용하여 폼 데이터를 POST 요청으로 보내는 코드
-	document.getElementById('myForm').addEventListener('submit', function(event) {
-		event.preventDefault(); // 기본 폼 제출 동작을 방지
+import axios from 'axios';
 
-		// FormData 객체로 폼 데이터 가져오기
-		const formData = new FormData(event.target);
+export default {
+  data() {
+    return {
+      form: {
+        name: '',
+        age: '',
+        gender: '남',
+        tel: '',
+        email: '',
+        address: '',
+        id: '',
+        passwd: ''
+      }
+    };
+  },
+  methods: {
+    handleSubmit() {
+      // FormData 객체로 폼 데이터 가져오기
+      const formData = new FormData();
+      for (const key in this.form) {
+        formData.append(key, this.form[key]);
+      }
 
-		// Axios를 사용하여 POST 요청 보내기
-		axios.post('/signup', formData)
-			.then(response => {
-			console.log('Success:', response.data);
-			// 성공 시 처리할 내용 추가 (예: 사용자에게 알림)
-			})
-			.catch(error => {
-			console.error('Error:', error);
-			// 에러 발생 시 처리할 내용 추가 (예: 오류 메시지 표시)
-			});
-		});
-
+      // Axios를 사용하여 POST 요청 보내기
+      axios.post('http://localhost:8080/signup', formData) // 실제 URL로 변경
+        .then(response => {
+          console.log('Success:', response.data);
+          // 성공 시 처리할 내용 추가 (예: 사용자에게 알림)
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          // 에러 발생 시 처리할 내용 추가 (예: 오류 메시지 표시)
+        });
+    }
+  }
+};
 </script>
 
 <style scoped>
-
+/* 스타일은 동일 */
 .signup {
   margin-top: 30px;
   margin-left: auto;
@@ -124,5 +142,4 @@ input {
    cursor: pointer;           /* 커서 포인터 */
    margin-top: 10px;          /* 버튼과 라디오 그룹 간격 */
 }
-
 </style>
