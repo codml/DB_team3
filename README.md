@@ -10,4 +10,8 @@
 ###### git pull 에러나면 yarn.lock 삭제후 git pull하기
 ###### git pull 후에 yarn install 하면 정상적으로 실행됩니다
 
+---
+
+#### 작업 기록
+
 11.13 - 로그인, 회원가입, 상품 등록 페이지 UI 디자인 완료
