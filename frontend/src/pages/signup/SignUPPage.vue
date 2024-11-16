@@ -61,73 +61,78 @@ export default {
 		};
 	},
 	methods: {
-		handleSubmit() {
-		// FormData 객체로 폼 데이터 가져오기
-		const formData = new FormData();
-		for (const key in this.form) {
-			formData.append(key, this.form[key]);
+    async submitData() {
+		try {
+			const payload = {
+			name: this.name,
+			email: this.email
+			};
+			const response = await axios.post('https://api.example.com/submit', payload);
+			console.log('서버 응답:', response.data);
+			alert('데이터가 성공적으로 전송되었습니다!');
+		} catch (error) {
+			console.error('오류 발생:', error);
+			alert('데이터 전송 중 오류가 발생했습니다. 다시 시도해주세요.');
 		}
-	}},
-	mounted(): {
-		// Axios를 사용하여 POST 요청 보내기
-		axios.post('http://localhost:8080/signup', formData) // 실제 URL로 변경
-			.then(response => {
-				console.log('Success:', response.data);
-			// 성공 시 처리할 내용 추가 (예: 사용자에게 알림)
-			})
-			.catch(error => {
-				console.error('Error:', error);
-				// 에러 발생 시 처리할 내용 추가 (예: 오류 메시지 표시)
-			});
-		}
+    }
+  }
 };
 </script>
 
 <style scoped>
-/* 스타일은 동일 */
-.signup {
-  margin-top: 30px;
-  margin-left: auto;
-  margin-right: auto;
-  border-style: solid;
-  border-radius: 10px;
-  width: 500px;
-  height: 900px;
-}
-
-h1 {
-  margin: 20px;
-}
-
-.information {
-  margin-top: 30px;
-  margin-left: 100px;
-  margin-right: 100px;
-}
-
-label {
-	font-size: 20px;
-    text-align: left; /* 텍스트 왼쪽 정렬 */
-    display: block;   /* label을 블록 요소로 설정하여 전체 너비를 차지하게 함 */
+  .signup {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
   }
 
-input {
-  width: 300px;
-  height: 40px;
-  border-style: solid;
-  border-radius: 5px;
-  border-color: black;
-  font-size: 18px;
-}
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
 
-#btn_signup {
-   padding: 12px 24px;        /* 버튼 크기 조절 */
-   font-size: 16px;           /* 텍스트 크기 */
-   border: none;              /* 기본 테두리 제거 */
-   border-radius: 5px;        /* 모서리를 둥글게 */
-   background-color: #007bff; /* 배경색 */
-   color: white;              /* 텍스트 색상 */
-   cursor: pointer;           /* 커서 포인터 */
-   margin-top: 10px;          /* 버튼과 라디오 그룹 간격 */
-}
+  .information {
+    margin-bottom: 15px;
+  }
+
+  label {
+    font-weight: bold;
+    color: #555;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  input[type="radio"] {
+    margin-right: 5px;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
 </style>
