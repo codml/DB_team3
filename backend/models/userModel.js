@@ -12,6 +12,6 @@ exports.insertUser = (req, callback) => {
 		[req.name, req.age, req.gender, req.tel, req.email, req.address, req.id, req.passwd], function(err, rows){
 			if(err) throw err;
 			console.log("rows : " + JSON.stringify(rows));
-			callback();
+			callback(rows);
 		});	
 }
