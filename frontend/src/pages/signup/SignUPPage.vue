@@ -46,40 +46,40 @@
 import axios from 'axios';
 
 export default {
-  data() {
-    return {
-      form: {
-        name: '',
-        age: '',
-        gender: '남',
-        tel: '',
-        email: '',
-        address: '',
-        id: '',
-        passwd: ''
-      }
-    };
-  },
-  methods: {
-    handleSubmit() {
-      // FormData 객체로 폼 데이터 가져오기
-      const formData = new FormData();
-      for (const key in this.form) {
-        formData.append(key, this.form[key]);
-      }
-
-      // Axios를 사용하여 POST 요청 보내기
-      axios.post('http://localhost:8080/signup', formData) // 실제 URL로 변경
-        .then(response => {
-          console.log('Success:', response.data);
-          // 성공 시 처리할 내용 추가 (예: 사용자에게 알림)
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          // 에러 발생 시 처리할 내용 추가 (예: 오류 메시지 표시)
-        });
-    }
-  }
+	data() {
+		return {
+		form: {
+			name: '',
+			age: '',
+			gender: '남',
+			tel: '',
+			email: '',
+			address: '',
+			id: '',
+			passwd: ''
+		}
+		};
+	},
+	methods: {
+		handleSubmit() {
+		// FormData 객체로 폼 데이터 가져오기
+		const formData = new FormData();
+		for (const key in this.form) {
+			formData.append(key, this.form[key]);
+		}
+	}},
+	mounted(): {
+		// Axios를 사용하여 POST 요청 보내기
+		axios.post('http://localhost:8080/signup', formData) // 실제 URL로 변경
+			.then(response => {
+				console.log('Success:', response.data);
+			// 성공 시 처리할 내용 추가 (예: 사용자에게 알림)
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				// 에러 발생 시 처리할 내용 추가 (예: 오류 메시지 표시)
+			});
+		}
 };
 </script>
 
