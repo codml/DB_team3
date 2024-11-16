@@ -61,19 +61,15 @@ export default {
 		};
 	},
 	methods: {
-    async submitData() {
-		try {
-			const payload = {
-			name: this.name,
-			email: this.email
-			};
-			const response = await axios.post('https://api.example.com/submit', payload);
-			console.log('서버 응답:', response.data);
-			alert('데이터가 성공적으로 전송되었습니다!');
-		} catch (error) {
-			console.error('오류 발생:', error);
-			alert('데이터 전송 중 오류가 발생했습니다. 다시 시도해주세요.');
-		}
+    async handleSubmit() {
+      try {
+        const response = await axios.post('https://api.example.com/signup', this.form);
+        console.log('서버 응답:', response.data);
+        alert('회원가입이 성공적으로 완료되었습니다!');
+      } catch (error) {
+        console.error('오류 발생:', error);
+        alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
     }
   }
 };
