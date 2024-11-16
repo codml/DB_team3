@@ -14,9 +14,11 @@
 
 #### 웹 실행법!!!
 
-frontend 경로에서 yarn serve
+frontend 경로에서 
+##### yarn serve
 
-backend 경로에서 npm start
+backend 경로에서 
+##### npm start
 
 둘 다 켜놔야됨
 
