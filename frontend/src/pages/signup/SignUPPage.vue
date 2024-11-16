@@ -63,7 +63,7 @@ export default {
 	methods: {
     async handleSubmit() {
       try {
-        const response = await axios.post('https://api.example.com/signup', this.form);
+        const response = await axios.post('http://localhost:3000/signup', this.form);
         console.log('서버 응답:', response.data);
         alert('회원가입이 성공적으로 완료되었습니다!');
       } catch (error) {
