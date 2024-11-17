@@ -24,3 +24,9 @@ git pull 후에 yarn install 하면 정상적으로 실행됩니다
 #### 작업 기록
 
 11.13 - 로그인, 회원가입, 상품 등록 페이지 UI 디자인 완료
+
+11.17 - 고동우 : 로그인 구현 완료, 회원가입 성공 시 리다이렉트 수정
+
+        추가 라이브러리 : jsonwebtoken bcryptjs body-parser (npm install jsonwebtoken bcryptjs body-parser)
+
+  
