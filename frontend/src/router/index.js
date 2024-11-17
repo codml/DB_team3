@@ -37,8 +37,28 @@ const routes = [
   },
   {
     path: '/board',
+    redirect: '/board/page_1', // 기본 경로를 page_1로 설정
+  },
+  {
+    path: '/board/page_:page', // 동적 경로로 페이지 구분
     name: 'board',
-    component: () => import('../pages/board/BoardPage.vue')
+    component: () => import('../pages/board/BoardPage.vue'),
+    props: true,
+  },
+  {
+    path: '/board/writePost',
+    name: 'WritePost',
+    component: () => import('../pages/board/writePost/WritePost.vue')
+  },
+  {
+    path: '/board/viewPost',
+    name: 'ViewPost',
+    component: () => import('../pages/board/viewPost/ViewPost.vue')
+  },
+  {
+    path: '/board/updatePost',
+    name: 'UpdatePost',
+    component: () => import('../pages/board/updatePost/UpdatePost.vue')
   },
 ]
 
