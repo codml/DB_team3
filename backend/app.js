@@ -7,6 +7,9 @@ const cors = require('cors');
 
 var marketRouters = require('./routes/market');
 var signupRouters = require('./routes/signup');
+var writepostRouters = require('./routes/writepost'); var boardpageRouters = require('./routes/boardpage'); // boardpage 라우트 추가
+
+
 
 var app = express();
 
@@ -24,13 +27,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', marketRouters);
 app.use('/signup', signupRouters);
 
+app.use('/writepost', writepostRouters);
+app.use('/boardpage', boardpageRouters);
+
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

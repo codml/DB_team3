@@ -9,10 +9,10 @@
       <div class="notice-list">
         <div class="notice-item" v-for="(notice, index) in paginatedNotices" :key="index">
           <div class="notice-title">
-            <a href="#" @click.prevent="goToViewNotice(notice)">{{ notice.title }}</a>
+            <a href="#" @click.prevent="goToViewNotice(notice)">{{ notice.Title }}</a>
           </div>
-          <div class="notice-author">{{ notice.author }}</div>
-          <div class="notice-time">({{ notice.time }})</div>
+          <div class="notice-author">{{ notice.Uid }}</div>
+          <div class="notice-time">({{ notice.Reg_Date }})</div>
         </div>
       </div>
     </div>
@@ -26,10 +26,10 @@
       <div class="bulletin-list">
         <div class="bulletin-item" v-for="(post, index) in paginatedPosts" :key="index">
           <div class="bulletin-title">
-            <a href="#" @click.prevent="goToViewPost(post)">{{ post.title }}</a>
+            <a href="#" @click.prevent="goToViewPost(post)">{{ post.Title }}</a>
           </div>
-          <div class="bulletin-author">{{ post.author }}</div>
-          <div class="bulletin-time">({{ post.time }})</div>
+          <div class="bulletin-author">{{ post.Uid }}</div>
+          <div class="bulletin-time">({{ post.Reg_Date }})</div>
         </div>
       </div>
     </div>
@@ -44,23 +44,14 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
-  props: ['page'], // URL에서 전달받은 페이지 번호
+  props: ["page"], // URL에서 전달받은 페이지 번호
   data() {
     return {
-      notices: Array.from({ length: 20 }, (_, i) => ({
-        title: `공지 제목 ${i + 1}`,
-        author: '관리자',
-        time: `2024-11-${30 - i}`,
-        content: `공지 ${i + 1}의 내용입니다.`,
-      })),
-      posts: Array.from({ length: 40 }, (_, i) => ({
-        title: `게시글 제목 ${i + 1}`,
-        author: `사용자${i + 1}`,
-        time: `2024-11-${30 - i}`,
-        content: `게시글 ${i + 1}의 내용입니다.`,
-      })),
-      itemsPerPage: 1,
+      posts: [], // 실제 게시글 데이터를 저장
+      itemsPerPage: 1, // 페이지당 게시물 수 설정
     };
   },
   computed: {
@@ -68,49 +59,67 @@ export default {
       return parseInt(this.page) || 1;
     },
     totalPages() {
-      return Math.max(
-        Math.ceil(this.notices.length / 3),
-        Math.ceil(this.posts.length / 9)
-      );
+      const noticePages = Math.ceil(this.notices.length / 3);
+      const postPages = Math.ceil(this.posts.length / 9);
+      return Math.max(noticePages, postPages);
+    },
+    notices() {
+      // Notice 값을 문자열로 변환하여 필터링
+      return this.posts.filter(post => String(post.Notice) === "1");
     },
     paginatedNotices() {
       const start = (this.currentPage - 1) * 3;
       const end = start + 3;
       return this.notices.slice(start, end);
     },
+    generalPosts() {
+      // Notice 값이 0인 게시글 필터링
+      return this.posts.filter(post => String(post.Notice) === "0");
+    },
     paginatedPosts() {
       const start = (this.currentPage - 1) * 9;
       const end = start + 9;
-      return this.posts.slice(start, end);
+      return this.generalPosts.slice(start, end);
     },
   },
   methods: {
+    async fetchPosts() {
+      try {
+        const response = await axios.get("http://localhost:3000/boardpage");
+        console.log("Fetched posts:", response.data); // 데이터를 확인하기 위한 출력
+        this.posts = response.data;
+      } catch (error) {
+        console.error("게시글 데이터를 가져오는 중 오류 발생:", error);
+      }
+    },
     nextPage() {
       if (this.currentPage < this.totalPages) {
-        this.$router.push({ name: 'board', params: { page: this.currentPage + 1 } });
+        this.$router.push({ name: "board", params: { page: this.currentPage + 1 } });
       }
     },
     prevPage() {
       if (this.currentPage > 1) {
-        this.$router.push({ name: 'board', params: { page: this.currentPage - 1 } });
+        this.$router.push({ name: "board", params: { page: this.currentPage - 1 } });
       }
     },
     goToViewNotice(notice) {
       this.$router.push({
-        name: 'ViewPost',
-        query: { type: 'notice', ...notice, page: this.currentPage },
+        name: "ViewPost",
+        query: { type: "notice", ...notice, page: this.currentPage },
       });
     },
     goToViewPost(post) {
       this.$router.push({
-        name: 'ViewPost',
-        query: { type: 'post', ...post, page: this.currentPage },
+        name: "ViewPost",
+        query: { type: "post", ...post, page: this.currentPage },
       });
     },
   },
+  created() {
+    this.fetchPosts(); // 컴포넌트 생성 시 게시물 데이터 로드
+  },
 };
 </script>
-
 
 <style scoped>
 .container {
