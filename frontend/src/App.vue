@@ -4,11 +4,21 @@
   </div>
 
   <div v-if="!isAuthPage" class="account">
-    <div class="login">
-      <router-link to="/login">로그인</router-link>
+    <div v-if="!isLoggedIn" class="sign">
+      <div class="login">
+        <router-link to="/login">로그인</router-link>
+      </div>
+      <div class="signup">
+        <router-link to="/signup">회원가입</router-link>
+      </div>
     </div>
-    <div class="signup">
-      <router-link to="/signup">회원가입</router-link>
+    <div v-else class="sign">
+      <div class="logout">
+        <router-link to="/logout" @click="handleLogout">로그아웃</router-link>
+      </div>
+      <div class="mypage">
+        <router-link :to="mypageRoute">마이페이지</router-link>
+      </div>
     </div>
   </div>
 
@@ -16,22 +26,41 @@
     <router-link to="/search">상품 검색</router-link>
     <router-link to="/regist">상품 등록</router-link>
     <router-link to="/price">시세 조회</router-link>
-    <router-link to="/board">자유게시판</router-link>
+    <router-link to="/board/page_1">자유게시판</router-link>
   </nav>
 
   <router-view />
 </template>
 
 <script>
+import {jwtDecode} from "jwt-decode";
+
 export default {
   computed: {
     isAuthPage() {
       return this.$route.path === '/login' || this.$route.path === '/signup';
+    },
+    isLoggedIn() {
+      const token = localStorage.getItem('token');
+      return !!token;
+    },
+    mypageRoute() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded = jwtDecode(token);
+        return decoded.auth === 0 ? '/userpage' : '/adminpage';
+      }
+      return '/login';
+    }
+  },
+  methods: {
+    handleLogout() {
+      localStorage.removeItem('token');
+      this.$router.push('/login');
     }
   }
 }
 </script>
-
 
 <style>
 #app {
@@ -56,9 +85,14 @@ div.main a.router-link-exact-active {
 div.account {
   margin-top: 20px;
   display: flex;
+  justify-content: flex-end;  /* 오른쪽 정렬 */
+  margin-right: 300px;  /* 오른쪽 여백 */
+  align-items: center;  /* 세로 가운데 정렬 */
+}
+
+.sign{
+  display: flex; /* 버튼들을 가로로 배치 */
   gap: 10px;
-  justify-content: flex-end;
-  margin-right: 300px;
 }
 
 div.account a {
@@ -68,7 +102,7 @@ div.account a {
 }
 
 div a.router-link-exact-active {
-  color: #42b983;
+  color: #2c3e50;
 }
 
 nav {
