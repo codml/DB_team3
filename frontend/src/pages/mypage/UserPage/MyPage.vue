@@ -24,26 +24,49 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
+	data() {
+    return {
+      user: {}, // 회원 정보를 저장할 객체
+      loading: true, // 로딩 상태
+    };
+  },
+  
   methods: {
     navigate(page) {
       alert(`${page}로 이동합니다!`);
     },
   },
+
+  mounted() {
+    // 마이페이지에 접속하자마자 회원 정보 요청
+    axios
+      .get("http://localhost:3000/mypage") // API 엔드포인트 예시
+      .then((response) => {
+        this.user = response.data; // 서버에서 받은 회원 정보 저장
+      })
+      .catch((error) => {
+        console.error("회원 정보 요청 실패:", error);
+      })
+      .finally(() => {
+        this.loading = false; // 로딩 상태 종료
+      });
+  }
 };
 </script>
 
 <style scoped>
 /* 전체 레이아웃 */
 #app {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-	font-family: Arial, sans-serif;
+    width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+  border: solid black;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
 /* 메인 컨텐츠 스타일 */
