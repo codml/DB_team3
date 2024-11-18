@@ -1,5 +1,4 @@
 <template>
-<<<<<<< HEAD
   <div id="app">
     <!-- 메인 섹션 -->
     <main class="main-content">
@@ -87,9 +86,3 @@ export default {
   height: 300px;
 }
 </style>
-=======
-  <div class="mypage">
-    <h1>마이페이지입니다.</h1>
-  </div>
-</template>
->>>>>>> main
