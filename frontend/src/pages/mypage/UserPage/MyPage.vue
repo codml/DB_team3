@@ -43,7 +43,7 @@ export default {
   mounted() {
     // 마이페이지에 접속하자마자 회원 정보 요청
     axios
-      .get("http://localhost:3000/mypage") // API 엔드포인트 예시
+      .get("http://localhost:3000/mypage")
       .then((response) => {
         this.user = response.data; // 서버에서 받은 회원 정보 저장
       })

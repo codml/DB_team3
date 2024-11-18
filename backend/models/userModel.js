@@ -18,11 +18,6 @@ exports.insertUser = (req, callback) => {
 		});	
 }
 
-exports.getUser = (req, callback) => {
-	var sql = 'SELECT * FROM usr WHERE Id = ?;'
-	
-}
-
 exports.loginUser = (req, callback) => {
     console.log(req);
 
