@@ -25,6 +25,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
 app.use('/', marketRouters);
+app.use('/signup', signupRouters);
+app.use('/search', searchRouters);
 
 app.use('/writepost', writepostRouters);
 app.use('/boardpage', boardpageRouters);
