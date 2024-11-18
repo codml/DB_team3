@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 
 var marketRouters = require('./routes/market');
 
+var searchRouters = require('./routes/search');
+
 var signupRouters = require('./routes/signup');
 var writepostRouters = require('./routes/writepost'); var boardpageRouters = require('./routes/boardpage'); // boardpage 라우트 추가
 
