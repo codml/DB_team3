@@ -10,9 +10,6 @@ var marketRouters = require('./routes/market');
 var signupRouters = require('./routes/signup');
 var searchRouters = require('./routes/search');
 
-var signupRouters = require('./routes/signup');
-var writepostRouters = require('./routes/writepost'); var boardpageRouters = require('./routes/boardpage'); // boardpage 라우트 추가
-
 var app = express();
 
 // view engine setup
