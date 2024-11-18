@@ -5,22 +5,14 @@
 
   <!-- 로그인 페이지나 회원가입 페이지가 아닐 때 -->
   <div v-if="!isAuthPage" class="account">
-<<<<<<< HEAD
-    <div class="mypage">
-      <router-link to="/mypage">마이페이지</router-link>
-    </div>
-    <div class="login">
-      <router-link to="/login">로그인</router-link>
-=======
     <!-- 로그인/회원가입 버튼이 아니라, 로그인 상태에 따라 변경 -->
     <div v-if="!isLoggedIn" class="sign">
-      <div class="login">
-        <router-link to="/login">로그인</router-link>
-      </div>
-      <div class="signup">
-        <router-link to="/signup">회원가입</router-link>
-      </div>
->>>>>>> main
+		<div class="login">
+			<router-link to="/login">로그인</router-link>
+		</div>
+		<div class="signup">
+			<router-link to="/signup">회원가입</router-link>
+		</div>
     </div>
     <div v-else class="sign">
       <div class="logout">
