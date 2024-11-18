@@ -68,6 +68,18 @@ const routes = [
     component: () => import('../pages/board/updatePost/UpdatePost.vue'),
     meta: { requiresAuth: true } // 인증이 필요한 페이지
   },
+  {
+    path: '/userpage',
+    name: 'userpage',
+    component: () => import('../pages/mypage/UserPage/MyPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/adminpage',
+    name: 'adminpage',
+    component: () => import('../pages/mypage/AdminPage/AdminPage.vue'),
+    meta: { requiresAuth: true }
+  }
 ]
 
 const router = createRouter({

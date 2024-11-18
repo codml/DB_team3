@@ -3,9 +3,7 @@
     <router-link to="/main">광운 마켓</router-link>
   </div>
 
-  <!-- 로그인 페이지나 회원가입 페이지가 아닐 때 -->
   <div v-if="!isAuthPage" class="account">
-    <!-- 로그인/회원가입 버튼이 아니라, 로그인 상태에 따라 변경 -->
     <div v-if="!isLoggedIn" class="sign">
       <div class="login">
         <router-link to="/login">로그인</router-link>
@@ -19,7 +17,7 @@
         <router-link to="/logout" @click="handleLogout">로그아웃</router-link>
       </div>
       <div class="mypage">
-        <router-link to="/mypage">마이페이지</router-link>
+        <router-link :to="mypageRoute">마이페이지</router-link>
       </div>
     </div>
   </div>
@@ -28,34 +26,41 @@
     <router-link to="/search">상품 검색</router-link>
     <router-link to="/regist">상품 등록</router-link>
     <router-link to="/price">시세 조회</router-link>
-    <router-link to="/board">자유게시판</router-link>
+    <router-link to="/board/page_1">자유게시판</router-link>
   </nav>
 
   <router-view />
 </template>
 
 <script>
+import {jwtDecode} from "jwt-decode";
+
 export default {
   computed: {
-    // 현재 페이지가 로그인이나 회원가입 페이지인지 체크
     isAuthPage() {
       return this.$route.path === '/login' || this.$route.path === '/signup';
     },
-    // localStorage에 token이 있는지 확인하여 로그인 상태를 파악
     isLoggedIn() {
-      return !!localStorage.getItem('token');  // token이 존재하면 true, 없으면 false
+      const token = localStorage.getItem('token');
+      return !!token;
+    },
+    mypageRoute() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded = jwtDecode(token);
+        return decoded.auth === 0 ? '/userpage' : '/adminpage';
+      }
+      return '/login';
     }
   },
   methods: {
-    // 로그아웃 처리
     handleLogout() {
-      localStorage.removeItem('token');  // token 삭제
-      this.$router.push('/login');       // 로그인 페이지로 리디렉션
+      localStorage.removeItem('token');
+      this.$router.push('/login');
     }
   }
 }
 </script>
-
 
 <style>
 #app {
@@ -97,7 +102,7 @@ div.account a {
 }
 
 div a.router-link-exact-active {
-  color: #42b983;
+  color: #2c3e50;
 }
 
 nav {
