@@ -24,13 +24,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
-app.use('/', marketRouters);
-app.use('/signup', signupRouters);
-app.use('/search', searchRouters);
-
-app.use('/writepost', writepostRouters);
-app.use('/boardpage', boardpageRouters);
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
