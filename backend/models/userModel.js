@@ -17,32 +17,29 @@ exports.insertUser = (req, callback) => {
 }
 
 exports.loginUser = (req, callback) => {
-	console.log(req);
-	// 아이디가 존재하는지 확인
-	connection.query('SELECT * FROM usr WHERE Id = ?;', [req.userID], function(err, rows) {
-		if (err) {
-			console.error("DB 오류:", err);
-			callback('fail');
-			return;
-		}
+    console.log(req);
 
-		// 아이디가 존재하지 않으면 'fail' 반환
-		if (rows.length === 0) {
-			console.log("아이디가 존재하지 않음");
-			callback('ID fail');
-			return;
-		}
+    connection.query('SELECT * FROM usr WHERE Id = ?;', [req.userID], function(err, rows) {
+        if (err) {
+            console.error("DB 오류:", err);
+            callback('fail');
+            return;
+        }
 
-		// 아이디가 존재하면 비밀번호 비교
-		const user = rows[0];
-		if (user.Passwd === req.userPwd) {
-			// 비밀번호가 일치하면 'success' 반환
-			console.log("로그인 성공");
-			callback('success');
-		} else {
-			// 비밀번호가 틀리면 'fail' 반환
-			console.log("비밀번호 불일치");
-			callback('PW fail');
-		}
-	});
-}
+        if (rows.length === 0) {
+            console.log("아이디가 존재하지 않음");
+            callback('ID fail');
+            return;
+        }
+
+        const user = rows[0];
+        if (user.Passwd === req.userPwd) {
+            console.log("로그인 성공");
+            callback('success', user); // 성공 시 사용자 데이터 반환
+        } else {
+            console.log("비밀번호 불일치");
+            callback('PW fail');
+        }
+    });
+};
+
