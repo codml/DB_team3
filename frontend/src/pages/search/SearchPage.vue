@@ -3,53 +3,59 @@
     <main>
       <!-- 검색 및 정렬 필터 -->
       <section class="center-search">
-        <h2>검색 필터</h2>
-        <div class="category-row">
-          <div class="input-group">
-            <label for="main-category">대분류:</label>
-            <input
-              type="text"
-              id="main-category"
-              v-model="mainCategory"
-              placeholder="대분류 입력"
-            />
+        <h1 class="search-title">검색 필터</h1>
+        <div class="filter-container">
+          <div class="row">
+            <div class="input-group">
+              <label for="main-category">대분류:</label>
+              <input
+                type="text"
+                id="main-category"
+                v-model="mainCategory"
+                placeholder="대분류 입력"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sub-category">소분류:</label>
+              <input
+                type="text"
+                id="sub-category"
+                v-model="subCategory"
+                placeholder="소분류 입력"
+              />
+            </div>
           </div>
-          <div class="input-group">
-            <label for="sub-category">소분류:</label>
-            <input
-              type="text"
-              id="sub-category"
-              v-model="subCategory"
-              placeholder="소분류 입력"
-            />
-          </div>
-          <div class="input-group">
-            <label for="price-range">가격:</label>
-            <input
-              type="number"
-              v-model.number="priceFrom"
-              placeholder="최소 가격 입력"
-            />
-            ~
-            <input
-              type="number"
-              v-model.number="priceTo"
-              placeholder="최대 가격 입력"
-            />
-          </div>
-          <button @click="fetchPosts">검색</button>
-        </div>
 
-        <div class="keyword-search">
-          <label for="search-query">제목 키워드:</label>
-          <div class="search-bar">
-            <input
-              type="text"
-              id="search-query"
-              v-model="searchQuery"
-              placeholder="검색할 상품 제목 입력"
-            />
-            <button @click="fetchPosts">검색</button>
+          <div class="row">
+            <div class="input-group keyword-group">
+              <label for="search-query">제목 키워드:</label>
+              <div class="search-bar">
+                <input
+                  type="text"
+                  id="search-query"
+                  v-model="searchQuery"
+                  placeholder="검색할 상품 제목 입력"
+                />
+                <button @click="fetchPosts">검색</button>
+              </div>
+            </div>
+            <div class="input-group price-group">
+              <label for="price-range">가격:</label>
+              <div class="price-inputs">
+                <input
+                  type="number"
+                  v-model.number="priceFrom"
+                  placeholder="최소 가격"
+                />
+                ~
+                <input
+                  type="number"
+                  v-model.number="priceTo"
+                  placeholder="최대 가격"
+                />
+              </div>
+              <button @click="fetchPosts">검색</button>
+            </div>
           </div>
         </div>
 
@@ -60,6 +66,7 @@
         </div>
       </section>
 
+
       <!-- 게시물 목록 -->
       <section class="product-grid">
         <template v-if="posts.length > 0">
@@ -67,6 +74,7 @@
             v-for="(product, index) in posts"
             :key="index"
             class="product-card"
+            @click="redirectToRead(product.Ino)"
           >
             <div class="product-image">
               <img :src="product.Image" alt="상품 이미지" />
@@ -171,6 +179,10 @@ export default {
         this.currentPage = page;
       }
     },
+
+    redirectToRead(ino) {
+      this.$router.push(`/read/${ino}`);
+    },
   },
   mounted() {
     this.fetchPosts();
@@ -196,86 +208,120 @@ main {
 }
 
 .center-search {
-  padding: 10px 20px; /* 위 아래로 10px, 좌우로 20px */
-  margin-top: 20px;
-  border: 1px solid #000000;
-  padding-left: calc((100% - 1024px) / 2); /* 좌우 패딩을 상품 게시글 너비와 동일하게 */
-  padding-right: calc((100% - 1024px) / 2); /* 좌우 패딩을 상품 게시글 너비와 동일하게 */
-}
-
-.center-search > h2 {
-  font-size: 50px;
-  font-weight: bold; /* 강조를 위해 굵게 설정 */
-}
-
-
-.category-row {
+  width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
+}
+
+.search-title {
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
   margin-bottom: 20px;
 }
 
-.input-group {
+.filter-container {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 30px; /* 섹션 간 간격 */
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* 위쪽 정렬 */
+  width: 100%;
+  gap: 50px; /* 대분류와 소분류 사이 간격 */
+}
+
+.input-group {
+  flex: 1; /* 균등한 공간 배분 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input-group label {
+  font-weight: bold;
+  text-align: center;
 }
 
 .input-group input {
-  padding: 10px;
-  width: 200px;
-  margin-top: 5px;
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
 }
 
-.input-group button {
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #f8f8f8;
-  cursor: pointer;
-  border-radius: 5px;
+.keyword-group {
+  flex: 2;
 }
 
-.keyword-search {
+.price-group {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: 20px 0;
+  gap: 10px;
 }
 
-.keyword-search label {
-  margin-bottom: 10px;
+.price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.price-inputs input {
+  width: calc(50% - 10px); /* 입력창 50% 크기 조정 */
+  padding: 8px;
+  font-size: 14px;
 }
 
 .search-bar {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 10px; /* 검색창과 버튼 간격 */
 }
 
 .search-bar input {
-  padding: 15px;
-  width: 400px;
+  flex: 1; /* 입력창이 버튼과 비율을 맞추어 확장 */
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .search-bar button {
-  padding: 10px;
+  padding: 10px 20px; /* 버튼의 가로와 세로 패딩 조정 */
+  font-size: 16px; /* 글씨 크기 조정 */
   border: 1px solid #ccc;
+  border-radius: 4px;
   background-color: #f8f8f8;
   cursor: pointer;
-  border-radius: 5px;
+}
+
+.search-bar button:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
 }
 
 .filter-buttons {
+  align-self: flex-end;
   display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-top: 20px;
 }
 
 .filter-buttons button {
   padding: 10px 20px;
+  font-size: 14px;
   border: 1px solid #ccc;
   background-color: #f8f8f8;
   cursor: pointer;
@@ -286,6 +332,22 @@ main {
   background-color: #007bff;
   color: #fff;
   border-color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .center-search {
+    width: 90%;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .price-inputs {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 
@@ -309,6 +371,11 @@ main {
   background-color: #fff;
   width: 100%; /* 그리드 셀 너비에 맞춤 */
   min-width: 0; /* 그리드 아이템 오버플로우 방지 */
+  transition: border-color 0.3s ease; /* 부드러운 애니메이션 효과 */
+}
+
+.product-card:hover {
+  border-color: #007bff; /* 마우스를 올렸을 때 테두리 색 변경 */
 }
 
 .product-image {
