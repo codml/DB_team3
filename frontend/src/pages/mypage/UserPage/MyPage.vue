@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import axios from "axios";
+//import axios from "axios";
 
 export default {
 	data() {
@@ -40,20 +40,20 @@ export default {
     },
   },
 
-  mounted() {
-    // 마이페이지에 접속하자마자 회원 정보 요청
-    axios
-      .get("http://localhost:3000/mypage") // API 엔드포인트 예시
-      .then((response) => {
-        this.user = response.data; // 서버에서 받은 회원 정보 저장
-      })
-      .catch((error) => {
-        console.error("회원 정보 요청 실패:", error);
-      })
-      .finally(() => {
-        this.loading = false; // 로딩 상태 종료
-      });
-  }
+//   mounted() {
+//     // 마이페이지에 접속하자마자 회원 정보 요청
+//     axios
+//       .get("http://localhost:3000/mypage") // API 엔드포인트 예시
+//       .then((response) => {
+//         this.user = response.data; // 서버에서 받은 회원 정보 저장
+//       })
+//       .catch((error) => {
+//         console.error("회원 정보 요청 실패:", error);
+//       })
+//       .finally(() => {
+//         this.loading = false; // 로딩 상태 종료
+//       });
+//   }
 };
 </script>
 
