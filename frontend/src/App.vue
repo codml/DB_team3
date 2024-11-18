@@ -3,12 +3,24 @@
     <router-link to="/main">광운 마켓</router-link>
   </div>
 
+  <!-- 로그인 페이지나 회원가입 페이지가 아닐 때 -->
   <div v-if="!isAuthPage" class="account">
-    <div class="login">
-      <router-link to="/login">로그인</router-link>
+    <!-- 로그인/회원가입 버튼이 아니라, 로그인 상태에 따라 변경 -->
+    <div v-if="!isLoggedIn" class="sign">
+      <div class="login">
+        <router-link to="/login">로그인</router-link>
+      </div>
+      <div class="signup">
+        <router-link to="/signup">회원가입</router-link>
+      </div>
     </div>
-    <div class="signup">
-      <router-link to="/signup">회원가입</router-link>
+    <div v-else class="sign">
+      <div class="logout">
+        <router-link to="/logout" @click="handleLogout">로그아웃</router-link>
+      </div>
+      <div class="mypage">
+        <router-link to="/mypage">마이페이지</router-link>
+      </div>
     </div>
   </div>
 
@@ -25,8 +37,20 @@
 <script>
 export default {
   computed: {
+    // 현재 페이지가 로그인이나 회원가입 페이지인지 체크
     isAuthPage() {
       return this.$route.path === '/login' || this.$route.path === '/signup';
+    },
+    // localStorage에 token이 있는지 확인하여 로그인 상태를 파악
+    isLoggedIn() {
+      return !!localStorage.getItem('token');  // token이 존재하면 true, 없으면 false
+    }
+  },
+  methods: {
+    // 로그아웃 처리
+    handleLogout() {
+      localStorage.removeItem('token');  // token 삭제
+      this.$router.push('/login');       // 로그인 페이지로 리디렉션
     }
   }
 }
@@ -56,9 +80,14 @@ div.main a.router-link-exact-active {
 div.account {
   margin-top: 20px;
   display: flex;
+  justify-content: flex-end;  /* 오른쪽 정렬 */
+  margin-right: 300px;  /* 오른쪽 여백 */
+  align-items: center;  /* 세로 가운데 정렬 */
+}
+
+.sign{
+  display: flex; /* 버튼들을 가로로 배치 */
   gap: 10px;
-  justify-content: flex-end;
-  margin-right: 300px;
 }
 
 div.account a {
