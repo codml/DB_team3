@@ -12,7 +12,6 @@
               v-model="mainCategory"
               placeholder="대분류 입력"
             />
-            <button @click="fetchPosts">검색</button>
           </div>
           <div class="input-group">
             <label for="sub-category">소분류:</label>
@@ -22,8 +21,22 @@
               v-model="subCategory"
               placeholder="소분류 입력"
             />
-            <button @click="fetchPosts">검색</button>
           </div>
+          <div class="input-group">
+            <label for="price-range">가격:</label>
+            <input
+              type="number"
+              v-model.number="priceFrom"
+              placeholder="최소 가격 입력"
+            />
+            ~
+            <input
+              type="number"
+              v-model.number="priceTo"
+              placeholder="최대 가격 입력"
+            />
+          </div>
+          <button @click="fetchPosts">검색</button>
         </div>
 
         <div class="keyword-search">
@@ -48,23 +61,28 @@
 
       <!-- 게시물 목록 -->
       <section class="product-grid">
-        <div
-          v-for="product in posts"
-          :key="product.id"
-          class="product-card"
-        >
-          <div class="product-image">
-            <img :src="product.image" alt="상품 이미지" />
+        <template v-if="posts.length > 0">
+          <div
+            v-for="(product, index) in posts"
+            :key="index"
+            class="product-card"
+          >
+            <div class="product-image">
+              <img :src="product.Image" alt="상품 이미지" />
+            </div>
+            <div class="product-info">
+              <h3>{{ product.Title }}</h3>
+              <p>가격: {{ product.Price }}원</p>
+              <p>찜: ❤ {{ product.Like_cnt }}</p>
+              <p>
+                [지역: {{ product.Place }} | 게시일: {{ product.Reg_date }} |
+                분류: {{ product.Group1 }}]
+              </p>
+            </div>
           </div>
-          <div class="product-info">
-            <h3>{{ product.title }}</h3>
-            <p>가격: {{ product.price }}원</p>
-            <p>찜: ❤ {{ product.likes }}</p>
-            <p>
-              [지역: {{ product.location }} | 게시일: {{ product.date }} |
-              분류: {{ product.category }}]
-            </p>
-          </div>
+        </template>
+        <div v-else class="no-posts">
+          게시물이 없습니다.
         </div>
       </section>
 
@@ -86,13 +104,15 @@
 </template>
 
 <script>
-// import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
     return {
       mainCategory: "",
       subCategory: "",
+      priceFrom: null,
+      priceTo: null,
       searchQuery: "",
       sortOption: "최신 순",
       itemsPerPage: 9, // 한 페이지에 표시할 게시물 수
@@ -101,13 +121,11 @@ export default {
     };
   },
   computed: {
-    // 현재 페이지에 표시할 게시물
     posts() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.allPosts.slice(start, end);
+      return Array.isArray(this.allPosts) ? this.allPosts.slice(start, end) : [];
     },
-    // 총 페이지 수 계산
     totalPages() {
       return Math.ceil(this.allPosts.length / this.itemsPerPage);
     },
@@ -116,220 +134,37 @@ export default {
     // 게시물 데이터를 백엔드에서 가져옴
     async fetchPosts() {
       try {
-        // // 백엔드에서 데이터를 요청하는 API 호출
-        // const response = await axios.get('http://localhost:3000/search', {
-        //   params: {
-        //     mainCategory: this.mainCategory,
-        //     subCategory: this.subCategory,
-        //     searchQuery: this.searchQuery,
-        //     sortOption: this.sortOption,
-        //   },
-        // });
+        const response = await axios.get("http://localhost:3000/search", {
+          params: {
+            mainCategory: this.mainCategory,
+            subCategory: this.subCategory,
+            priceFrom: this.priceFrom,
+            priceTo: this.priceTo,
+            searchQuery: this.searchQuery,
+            sortOption: this.sortOption,
+          },
+        });
+        console.log("Axios 응답 데이터:", response.data);
 
-        // 백엔드에서 받은 전체 게시물 데이터를 업데이트
-        // this.allPosts = response.data.posts; // 전체 게시물 데이터 저장
-        this.allPosts = [
-        {
-          id: 1,
-          image: "https://via.placeholder.com/150",
-          title: "전자기기 상품 1",
-          price: "10,000",
-          likes: 15,
-          location: "서울",
-          date: "2024-11-01",
-          category: "전자기기",
-          subCategory: "휴대폰",
-        },
-        {
-          id: 2,
-          image: "https://via.placeholder.com/150",
-          title: "전자기기 상품 2",
-          price: "20,000",
-          likes: 25,
-          location: "부산",
-          date: "2024-11-02",
-          category: "전자기기",
-          subCategory: "컴퓨터",
-        },
-        {
-          id: 3,
-          image: "https://via.placeholder.com/150",
-          title: "생활용품 상품 1",
-          price: "5,000",
-          likes: 10,
-          location: "인천",
-          date: "2024-11-03",
-          category: "생활용품",
-          subCategory: "주방용품",
-        },
-        {
-          id: 4,
-          image: "https://via.placeholder.com/150",
-          title: "가구 상품 1",
-          price: "30,000",
-          likes: 18,
-          location: "대구",
-          date: "2024-11-04",
-          category: "가구",
-          subCategory: "침대",
-        },
-        {
-          id: 5,
-          image: "https://via.placeholder.com/150",
-          title: "서적 상품 1",
-          price: "8,000",
-          likes: 12,
-          location: "서울",
-          date: "2024-11-05",
-          category: "서적",
-          subCategory: "소설",
-        },
-        {
-          id: 6,
-          image: "https://via.placeholder.com/150",
-          title: "의류 상품 1",
-          price: "15,000",
-          likes: 20,
-          location: "광주",
-          date: "2024-11-06",
-          category: "의류",
-          subCategory: "상의",
-        },
-        {
-          id: 7,
-          image: "https://via.placeholder.com/150",
-          title: "전자기기 상품 3",
-          price: "50,000",
-          likes: 35,
-          location: "대전",
-          date: "2024-11-07",
-          category: "전자기기",
-          subCategory: "가전제품",
-        },
-        {
-          id: 8,
-          image: "https://via.placeholder.com/150",
-          title: "생활용품 상품 2",
-          price: "10,000",
-          likes: 8,
-          location: "울산",
-          date: "2024-11-08",
-          category: "생활용품",
-          subCategory: "청소용품",
-        },
-        {
-          id: 9,
-          image: "https://via.placeholder.com/150",
-          title: "가구 상품 2",
-          price: "60,000",
-          likes: 22,
-          location: "부산",
-          date: "2024-11-09",
-          category: "가구",
-          subCategory: "소파",
-        },
-        {
-          id: 10,
-          image: "https://via.placeholder.com/150",
-          title: "서적 상품 2",
-          price: "12,000",
-          likes: 15,
-          location: "세종",
-          date: "2024-11-10",
-          category: "서적",
-          subCategory: "교재",
-        },
-        {
-          id: 11,
-          image: "https://via.placeholder.com/150",
-          title: "의류 상품 2",
-          price: "25,000",
-          likes: 28,
-          location: "제주",
-          date: "2024-11-11",
-          category: "의류",
-          subCategory: "하의",
-        },
-        {
-          id: 12,
-          image: "https://via.placeholder.com/150",
-          title: "전자기기 상품 4",
-          price: "100,000",
-          likes: 40,
-          location: "서울",
-          date: "2024-11-12",
-          category: "전자기기",
-          subCategory: "태블릿",
-        },
-        {
-          id: 13,
-          image: "https://via.placeholder.com/150",
-          title: "전자기기 상품 5",
-          price: "150,000",
-          likes: 50,
-          location: "부산",
-          date: "2024-11-13",
-          category: "전자기기",
-          subCategory: "노트북",
-        },
-        {
-          id: 14,
-          image: "https://via.placeholder.com/150",
-          title: "생활용품 상품 3",
-          price: "8,000",
-          likes: 5,
-          location: "광주",
-          date: "2024-11-14",
-          category: "생활용품",
-          subCategory: "욕실용품",
-        },
-        {
-          id: 15,
-          image: "https://via.placeholder.com/150",
-          title: "가구 상품 3",
-          price: "70,000",
-          likes: 15,
-          location: "울산",
-          date: "2024-11-15",
-          category: "가구",
-          subCategory: "책상",
-        },
-        {
-          id: 16,
-          image: "https://via.placeholder.com/150",
-          title: "서적 상품 3",
-          price: "10,000",
-          likes: 8,
-          location: "대전",
-          date: "2024-11-16",
-          category: "서적",
-          subCategory: "기타",
-        },
-        {
-          id: 17,
-          image: "https://via.placeholder.com/150",
-          title: "의류 상품 3",
-          price: "30,000",
-          likes: 18,
-          location: "대구",
-          date: "2024-11-17",
-          category: "의류",
-          subCategory: "코트",
-        },
-      ];
+        if (Array.isArray(response.data)) {
+          this.allPosts = response.data;
+        } else {
+          console.error("응답 데이터가 배열이 아닙니다.");
+          this.allPosts = [];
+        }
+
         this.currentPage = 1; // 새로운 데이터를 가져오면 첫 페이지로 초기화
       } catch (error) {
         console.error("게시물 데이터를 가져오는 중 오류 발생:", error);
+        this.allPosts = []; // 실패 시 빈 배열로 초기화
       }
     },
 
-    // 정렬 버튼 클릭 시 요청
     setSortOption(option) {
-      this.sortOption = option; // 선택한 정렬 옵션 설정
-      this.fetchPosts(); // 백엔드에 요청하여 데이터 가져오기
+      this.sortOption = option;
+      this.fetchPosts();
     },
 
-    // 페이지 변경 시 요청
     changePage(page) {
       if (page > 0 && page <= this.totalPages) {
         this.currentPage = page;
@@ -337,18 +172,26 @@ export default {
     },
   },
   mounted() {
-    this.fetchPosts(); // 컴포넌트가 로드될 때 게시물 데이터 가져오기
+    this.fetchPosts();
   },
 };
 </script>
 
-
 <style scoped>
+
 #app {
   font-family: Arial, sans-serif;
   max-width: 1024px;
   margin: 0 auto;
   padding: 20px;
+  box-sizing: border-box;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .center-search {
@@ -434,24 +277,56 @@ export default {
   border-color: #007bff;
 }
 
+
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr); /* 3개의 동일한 크기의 컬럼 */
   gap: 20px;
   margin-top: 20px;
+  width: 100%; /* 전체 너비 사용 */
+  max-width: 1024px; /* 최대 너비 제한 */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .product-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid #ccc;
+  border-radius: 5px;
   padding: 10px;
-  text-align: center;
+  background-color: #fff;
+  width: 100%; /* 그리드 셀 너비에 맞춤 */
+  min-width: 0; /* 그리드 아이템 오버플로우 방지 */
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 1; /* 정사각형 비율 유지 */
+  overflow: hidden; /* 이미지 넘침 방지 */
 }
 
 .product-image img {
-  max-width: 100%;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 이미지 비율 유지하며 컨테이너 채우기 */
+  display: block;
 }
 
+.product-info {
+  margin-top: 10px;
+}
+
+.product-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.product-info p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
 .pagination {
   display: flex;
   justify-content: center;
@@ -473,5 +348,3 @@ export default {
   cursor: not-allowed;
 }
 </style>
-
-
