@@ -15,7 +15,7 @@ exports.loginUser = (req, res, next) => {
                 { expiresIn: '3h' }
             );
 
-            res.json({ message: 'success', token: token, user: user }); // 사용자 정보를 반환
+            res.json({ message: 'success', token: token }); // 사용자 정보를 반환
         } else {
             res.json({ message: status }); // 실패 메시지 반환
         }
