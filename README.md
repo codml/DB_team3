@@ -12,6 +12,12 @@ backend 경로에서
 
 ---
 
+#### 추가 라이브러리
+
+npm install jsonwebtoken bcryptjs body-parse
+
+---
+
 ##### git push 시 주의점!!!
 yarn.lock 때문에 에러가 발생하니 frontend 파일에서 node_modules 빼고 push 해주세요
 
@@ -24,3 +30,4 @@ git pull 후에 yarn install 하면 정상적으로 실행됩니다
 #### 작업 기록
 
 11.13 - 로그인, 회원가입, 상품 등록 페이지 UI 디자인 완료
+
