@@ -3,6 +3,7 @@
     <main>
       <!-- 검색 및 정렬 필터 -->
       <section class="center-search">
+        <h2>검색 필터</h2>
         <div class="category-row">
           <div class="input-group">
             <label for="main-category">대분류:</label>
@@ -195,8 +196,18 @@ main {
 }
 
 .center-search {
+  padding: 10px 20px; /* 위 아래로 10px, 좌우로 20px */
   margin-top: 20px;
+  border: 1px solid #000000;
+  padding-left: calc((100% - 1024px) / 2); /* 좌우 패딩을 상품 게시글 너비와 동일하게 */
+  padding-right: calc((100% - 1024px) / 2); /* 좌우 패딩을 상품 게시글 너비와 동일하게 */
 }
+
+.center-search > h2 {
+  font-size: 50px;
+  font-weight: bold; /* 강조를 위해 굵게 설정 */
+}
+
 
 .category-row {
   display: flex;
