@@ -4,7 +4,7 @@ var connection = mysql.createConnection({
     connectionLimit: 5,
     host: 'localhost',
     user: 'root',
-    password: '0703Sql!!',
+    password: 'MySQLpass',
     database: 'db_market',
 });
 

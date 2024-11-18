@@ -4,12 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 
 var marketRouters = require('./routes/market');
-var searchRouters = require('./routes/search');
-
-var writepostRouters = require('./routes/writepost'); var boardpageRouters = require('./routes/boardpage'); // boardpage 라우트 추가
 
 var app = express();
 
@@ -25,10 +21,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', marketRouters);
-app.use('/search', searchRouters);
-
-app.use('/writepost', writepostRouters);
-app.use('/boardpage', boardpageRouters);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
