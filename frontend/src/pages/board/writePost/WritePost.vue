@@ -21,7 +21,6 @@
           type="file"
           id="photos"
           accept="image/*"
-          multiple
           @change="handleFileUpload"
           ref="fileInput"
           style="display: none;"
@@ -44,21 +43,20 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
     return {
       form: {
-        Uid: 'userTest', // 사용자 ID (테스트 값)
-        Title: '',
-        Content: '',
-        Notice: '0', // 공지 여부
-        Reg_Date: '', // 작성 시간
+        Uid: "userTest",
+        Title: "",
+        Content: "",
+        Notice: "0",
+        Reg_Date: "",
       },
-      photos: [], // 업로드된 파일 객체 배열
-      previews: [], // 이미지 미리보기 URL 배열
-      maxPhotos: 3, // 최대 업로드 가능 개수
+      photos: [],
+      previews: [],
     };
   },
   methods: {
@@ -66,84 +64,63 @@ export default {
       this.$refs.fileInput.click();
     },
     handleFileUpload(event) {
-      const files = Array.from(event.target.files);
-      const validFiles = files.filter(file => file.type.startsWith('image/'));
-
-      const availableSlots = this.maxPhotos - this.photos.length;
-      if (validFiles.length > 1) {
-        alert(`이미지는 최대 1장까지 업로드 가능합니다.`);
+      const file = event.target.files[0];
+      if (file && file.type.startsWith("image/")) {
+        this.photos = [file];
+        this.previews = [URL.createObjectURL(file)];
+      } else {
+        alert("이미지만 업로드할 수 있습니다.");
+      }
+    },
+    handleFileDelete(index) {
+      URL.revokeObjectURL(this.previews[index]);
+      this.photos = [];
+      this.previews = [];
+    },
+    async submitForm() {
+      if (!this.form.Title.trim() || !this.form.Content.trim()) {
+        alert("제목과 내용을 모두 입력해주세요.");
         return;
       }
 
-      validFiles.slice(0, availableSlots).forEach(file => {
-        const preview = URL.createObjectURL(file);
-        this.photos.push(file); // 파일 객체만 저장
-        this.previews.push(preview); // 미리보기 URL만 저장
-      });
+      const now = new Date();
+      this.form.Reg_Date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+        now.getDate()
+      ).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+        now.getSeconds()
+      ).padStart(2, "0")}`;
+
+      const formData = new FormData();
+      formData.append("Uid", this.form.Uid);
+      formData.append("Title", this.form.Title);
+      formData.append("Content", this.form.Content);
+      formData.append("Notice", this.form.Notice);
+      formData.append("Reg_Date", this.form.Reg_Date);
+
+      if (this.photos.length > 0) {
+        formData.append("Image", this.photos[0]);
+      }
+
+      try {
+        await axios.post("http://localhost:3000/writepost", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        alert("게시글이 성공적으로 등록되었습니다.");
+        this.$router.push("/board/page_1");
+      } catch (error) {
+        console.error("게시글 등록 중 오류:", error);
+        alert("게시글 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
     },
-    handleFileDelete(index) {
-      URL.revokeObjectURL(this.previews[index]); // 미리보기 URL 해제
-      this.photos.splice(index, 1); // 파일 삭제
-      this.previews.splice(index, 1); // 미리보기 URL 삭제
-    },
-    async submitForm() {
-  // 필수 입력 검증
-  if (!this.form.Title.trim()) {
-    alert('제목을 입력해주세요.');
-    return;
-  }
-  if (!this.form.Content.trim()) {
-    alert('내용을 입력해주세요.');
-    return;
-  }
-
-  // 작성 시간 추가
-  const now = new Date();
-  this.form.Reg_Date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(
-    now.getHours()
-  ).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-
-  // FormData 객체 생성
-  const formData = new FormData();
-  formData.append('Uid', this.form.Uid);
-  formData.append('Title', this.form.Title);
-  formData.append('Content', this.form.Content);
-  formData.append('Notice', this.form.Notice);
-  formData.append('Reg_Date', this.form.Reg_Date);
-
-  // 단일 이미지 추가 (첫 번째 이미지만 처리)
-  if (this.photos.length > 0) {
-    formData.append('Image', this.photos[0]); // 이미지 필드 이름을 'Image'로 고정
-  }
-
-  // 서버로 전송
-  try {
-    const response = await axios.post('http://localhost:3000/writepost', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    console.log('서버 응답:', response.data);
-    alert('게시글이 성공적으로 등록되었습니다.');
-    this.$router.push('/board/page_1');
-    this.resetForm();
-  } catch (error) {
-    console.error('게시글 등록 오류:', error);
-    alert('게시글 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
-  }
-},
-
-
-    resetForm() {
-      this.form.Title = '';
-      this.form.Content = '';
-      this.photos = [];
-      this.previews.forEach(preview => URL.revokeObjectURL(preview)); // 모든 미리보기 URL 해제
-      this.previews = [];
-    },
+  },
+  mounted() {
+    if (this.$route.query.Notice) {
+      this.form.Notice = this.$route.query.Notice;
+    }
   },
 };
 </script>
+
 
 <style scoped>
 /* 기존 스타일 그대로 유지 */

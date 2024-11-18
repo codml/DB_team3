@@ -4,7 +4,7 @@
     <div class="notice-section">
       <div class="section-header">
         <h2 class="section-title">【 공지 】</h2>
-        <button @click="$router.push({ name: 'WritePost' })">글쓰기</button>
+        <button @click="goToWritePost(1)">공지쓰기</button>
       </div>
       <div class="notice-list">
         <div class="notice-item" v-for="(notice, index) in paginatedNotices" :key="index">
@@ -12,7 +12,7 @@
             <a href="#" @click.prevent="goToViewNotice(notice)">{{ notice.Title }}</a>
           </div>
           <div class="notice-author">{{ notice.Uid }}</div>
-          <div class="notice-time">({{ notice.Reg_Date }})</div>
+          <div class="notice-time">({{ formatDate(notice.Reg_Date) }})</div>
         </div>
       </div>
     </div>
@@ -21,7 +21,7 @@
     <div class="bulletin-section">
       <div class="section-header">
         <h2 class="section-title">【 게시판 】</h2>
-        <button @click="$router.push({ name: 'WritePost' })">글쓰기</button>
+        <button @click="goToWritePost(0)">글쓰기</button>
       </div>
       <div class="bulletin-list">
         <div class="bulletin-item" v-for="(post, index) in paginatedPosts" :key="index">
@@ -29,7 +29,7 @@
             <a href="#" @click.prevent="goToViewPost(post)">{{ post.Title }}</a>
           </div>
           <div class="bulletin-author">{{ post.Uid }}</div>
-          <div class="bulletin-time">({{ post.Reg_Date }})</div>
+          <div class="bulletin-time" v-if="post.Reg_date">({{ formatDate(post.Reg_Date) }})</div>
         </div>
       </div>
     </div>
@@ -64,7 +64,6 @@ export default {
       return Math.max(noticePages, postPages);
     },
     notices() {
-      // Notice 값을 문자열로 변환하여 필터링
       return this.posts.filter(post => String(post.Notice) === "1");
     },
     paginatedNotices() {
@@ -73,7 +72,6 @@ export default {
       return this.notices.slice(start, end);
     },
     generalPosts() {
-      // Notice 값이 0인 게시글 필터링
       return this.posts.filter(post => String(post.Notice) === "0");
     },
     paginatedPosts() {
@@ -84,13 +82,24 @@ export default {
   },
   methods: {
     async fetchPosts() {
-      try {
-        const response = await axios.get("http://localhost:3000/boardpage");
-        console.log("Fetched posts:", response.data); // 데이터를 확인하기 위한 출력
-        this.posts = response.data;
-      } catch (error) {
-        console.error("게시글 데이터를 가져오는 중 오류 발생:", error);
-      }
+  try {
+    const response = await axios.get("http://localhost:3000/boardpage");
+    this.posts = response.data.map(post => ({
+      ...post,
+      Reg_Date: post.Reg_date, // 필드 이름 변환
+    }));
+  } catch (error) {
+    console.error("게시글 데이터를 가져오는 중 오류 발생:", error);
+  }
+},
+    formatDate(datetimeString) {
+      console.log("Formatting Date:", datetimeString); // 입력받은 데이터 출력
+      if (!datetimeString) return "N/A"; // 값이 없는 경우 처리
+      const [datePart, timePart] = datetimeString.split("T"); // 날짜와 시간 분리
+      if (!datePart || !timePart) return "N/A"; // 포맷이 이상하면 N/A 반환
+      const formattedDate = datePart; // 날짜 부분
+      const formattedTime = timePart.split(":").slice(0, 2).join(":"); // 시간 부분 (HH:MM)
+      return `${formattedDate} ${formattedTime}`;
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -112,6 +121,12 @@ export default {
       this.$router.push({
         name: "ViewPost",
         query: { type: "post", ...post, page: this.currentPage },
+      });
+    },
+    goToWritePost(noticeValue) {
+      this.$router.push({
+        name: "WritePost",
+        query: { Notice: noticeValue },
       });
     },
   },
