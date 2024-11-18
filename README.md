@@ -14,7 +14,7 @@ backend 경로에서
 
 #### 추가 라이브러리
 
-npm install jsonwebtoken bcryptjs body-parse
+벡엔드 : npm install jsonwebtoken bcryptjs body-parse
 
 ---
 
