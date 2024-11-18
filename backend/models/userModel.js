@@ -14,7 +14,8 @@ exports.insertUser = (req, callback) => {
 			req.name,
 			req.age,
 			req.gender,
-			req.tel, req.email,
+			req.tel,
+			req.email,
 			req.address,
 			req.id,
 			req.passwd

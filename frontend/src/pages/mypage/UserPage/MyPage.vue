@@ -42,17 +42,17 @@ export default {
 
   mounted() {
     // 마이페이지에 접속하자마자 회원 정보 요청
-    axios
-      .get("http://localhost:3000/mypage")
-      .then((response) => {
-        this.user = response.data; // 서버에서 받은 회원 정보 저장
-      })
-      .catch((error) => {
-        console.error("회원 정보 요청 실패:", error);
-      })
-      .finally(() => {
-        this.loading = false; // 로딩 상태 종료
-      });
+    // axios
+    //   .get("http://localhost:3000/mypage")
+    //   .then((response) => {
+    //     this.user = response.data; // 서버에서 받은 회원 정보 저장
+    //   })
+    //   .catch((error) => {
+    //     console.error("회원 정보 요청 실패:", error);
+    //   })
+    //   .finally(() => {
+    //     this.loading = false; // 로딩 상태 종료
+    //   });
   }
 };
 </script>
