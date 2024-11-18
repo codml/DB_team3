@@ -4,6 +4,9 @@
   </div>
 
   <div v-if="!isAuthPage" class="account">
+    <div class="mypage">
+      <router-link to="/mypage">마이페이지</router-link>
+    </div>
     <div class="login">
       <router-link to="/login">로그인</router-link>
     </div>
