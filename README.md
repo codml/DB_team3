@@ -14,7 +14,8 @@ backend 경로에서
 
 #### 추가 라이브러리
 
-벡엔드 : npm install jsonwebtoken bcryptjs body-parse
+npm install jsonwebtoken bcryptjs body-parse
+npm install jwt-decode
 
 ---
 
@@ -30,4 +31,6 @@ git pull 후에 yarn install 하면 정상적으로 실행됩니다
 #### 작업 기록
 
 11.13 - 로그인, 회원가입, 상품 등록 페이지 UI 디자인 완료
+
+11.18 - 지금까지 모든 작업 main에 병합 완료
 
