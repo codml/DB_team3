@@ -7,7 +7,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 var marketRouters = require('./routes/market');
-
+var signupRouters = require('./routes/signup');
 var searchRouters = require('./routes/search');
 
 var signupRouters = require('./routes/signup');
