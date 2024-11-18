@@ -5,7 +5,7 @@ const connection = mysql.createConnection({
     connectionLimit: 5,
     host: 'localhost',
     user: 'root',
-    password: 'Mineworld527!',
+    password: 'guswo3733^SQL',
     database: 'db_market'
 });
 
