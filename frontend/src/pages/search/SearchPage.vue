@@ -156,7 +156,14 @@ export default {
         console.log("Axios 응답 데이터:", response.data);
 
         if (Array.isArray(response.data)) {
-          this.allPosts = response.data;
+          this.allPosts = response.data.map(post => ({
+            ...post,
+            Image: post.Image
+              ? `data:image/jpeg;base64,${btoa(
+                  new Uint8Array(post.Image).reduce((data, byte) => data + String.fromCharCode(byte), "")
+                )}`
+              : "",
+          }));
         } else {
           console.error("응답 데이터가 배열이 아닙니다.");
           this.allPosts = [];
