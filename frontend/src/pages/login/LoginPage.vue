@@ -3,23 +3,75 @@
 
   <div class="login">
     <h1>Login</h1>
-    <form action="">
+    <form @submit.prevent="handleLogin">
       <div class="input-container">
         <span class="material-symbols-outlined icon-ID">person</span>
-        <input id="userID" name="userID" type="text" placeholder="아이디를 입력하세요." />
+        <input v-model="form.userID" id="userID" name="userID" type="text" placeholder="아이디를 입력하세요." required />
       </div>
       <div class="input-container">
-        <input id="userPwd" name="userPwd" type="password" placeholder="비밀번호를 입력하세요." />
+        <input v-model="form.userPwd" id="userPwd" name="userPwd" type="password" placeholder="비밀번호를 입력하세요." required />
         <span class="material-symbols-outlined icon-Lock">lock</span>
       </div>
       <div class="button-container">
-        <button class="fade-button">로그인</button>
+        <button class="fade-button" type="submit">로그인</button>
       </div>
     </form>    
   </div>
+  <br>
+  <div class="sub-link">
+    <a href="/signup" class="link">회원가입</a> | 
+    <a href="/main" class="link">아이디 찾기</a> | 
+    <a href="/main" class="link">비밀번호 찾기</a>
+  </div>
 </template>
 
+
 <script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      form: {
+        userID: '',
+        userPwd: ''
+      }
+    };
+  },
+  methods: {
+    async handleLogin() {
+      try {
+        if (this.form.userID && this.form.userPwd) {
+          console.log('로그인 시도:', this.form.userID, this.form.userPwd);
+          const response = await axios.post('http://localhost:3000/login', this.form);
+          console.log('서버 응답:', response.data.message);
+
+          if (response.data.message === 'success') {
+            alert('성공적으로 로그인 되었습니다!');
+
+            const token = response.data.token;
+            localStorage.setItem('token', token);
+
+            this.$router.push({ name: 'main' });
+          } 
+          else if (response.data.message === 'ID fail') {
+            alert('잘못된 아이디 입니다.');
+          } 
+          else if (response.data.message === 'PW fail') {
+            alert('잘못된 패스워드 입니다.');
+          }
+        } 
+        else {
+          alert('아이디와 비밀번호를 입력하세요.');
+        }
+      } 
+      catch (error) {
+        console.error('오류 발생:', error);
+        alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -83,6 +135,13 @@ input {
   cursor: pointer; /* 포인터 모양 변경 */
   transition: background-color 0.3s; /* 배경색 전환 효과 */
   padding: 0; /* 내부 여백 제거 */
+}
+
+.sub-link a {
+  font-size: 15px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #2c3e50;
 }
 
 </style>

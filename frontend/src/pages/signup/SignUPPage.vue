@@ -46,35 +46,47 @@
 import axios from 'axios';
 
 export default {
-	data() {
-		return {
-		form: {
-			name: '',
-			age: '',
-			gender: '남',
-			tel: '',
-			email: '',
-			address: '',
-			id: '',
-			passwd: ''
-		}
-		};
-	},
-	methods: {
+  data() {
+    return {
+      form: {
+        name: '',
+        age: '',
+        gender: '남',
+        tel: '',
+        email: '',
+        address: '',
+        id: '',
+        passwd: '',
+      }
+    };
+  },
+  methods: {
     async handleSubmit() {
       try {
         const response = await axios.post('http://localhost:3000/signup', this.form);
         console.log('서버 응답:', response.data);
         alert('회원가입이 성공적으로 완료되었습니다!');
-		this.$router.push({ name: 'main' });
+        
+        // 사용자에게 확인 메시지 표시
+        if (confirm('로그인 페이지로 이동하시겠습니까?')) {
+          this.$router.push({name: 'login'});  // '예' 선택 시 '/login'으로 이동
+        } else {
+          this.$router.push({name: 'main'});   // '아니오' 선택 시 '/main'으로 이동
+        }
       } catch (error) {
         console.error('오류 발생:', error);
-        alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+		if(error.response.status === 409){
+			alert('이미 존재하는 아이디입니다.');
+			this.form.id = '';
+		}
+		else
+			alert('회원가입 중 오류가 발생했습니다.');
       }
     }
   }
 };
 </script>
+
 
 <style scoped>
   .signup {
