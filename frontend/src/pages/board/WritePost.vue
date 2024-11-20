@@ -17,14 +17,8 @@
     <div class="form-group row">
       <label for="photos">이미지 업로드</label>
       <div class="photo-upload">
-        <input
-          type="file"
-          id="photos"
-          accept="image/*"
-          @change="handleFileUpload"
-          ref="fileInput"
-          style="display: none;"
-        />
+        <input type="file" id="photos" accept="image/*" @change="handleFileUpload" ref="fileInput"
+          style="display: none;" />
         <button type="button" @click="triggerFileInput">첨부할 이미지를 선택해주세요.</button>
         <div class="photo-previews">
           <div v-for="(preview, index) in previews" :key="index" class="photo-item">
@@ -44,12 +38,13 @@
 
 <script>
 import axios from "axios";
+import { jwtDecode } from "jwt-decode"; // 추가: JWT 디코더
 
 export default {
   data() {
     return {
       form: {
-        Uid: "userTest",
+        Uid: "", // 로그인 사용자 ID를 저장할 필드
         Title: "",
         Content: "",
         Notice: "0",
@@ -58,6 +53,27 @@ export default {
       photos: [],
       previews: [],
     };
+  },
+  mounted() {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const user = jwtDecode(token);
+        console.log("Decoded User:", user); // 디코딩된 사용자 정보 확인
+        this.form.Uid = user.userID; // userID를 Uid로 설정
+      } catch (error) {
+        console.error("JWT 디코딩 오류:", error);
+        alert("로그인 정보가 유효하지 않습니다. 다시 로그인하세요.");
+        this.$router.push("/login"); // 로그인 페이지로 이동
+      }
+    } else {
+      alert("로그인이 필요합니다.");
+      this.$router.push("/login"); // 로그인 페이지로 이동
+    }
+
+    if (this.$route.query.Notice) {
+      this.form.Notice = this.$route.query.Notice;
+    }
   },
   methods: {
     triggerFileInput() {
@@ -113,14 +129,8 @@ export default {
       }
     },
   },
-  mounted() {
-    if (this.$route.query.Notice) {
-      this.form.Notice = this.$route.query.Notice;
-    }
-  },
 };
 </script>
-
 
 <style scoped>
 /* 기존 스타일 그대로 유지 */

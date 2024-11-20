@@ -1,10 +1,11 @@
 <template>
   <div class="container">
-    <!-- Notice Section -->
+    <!-- 공지사항 -->
     <div class="notice-section">
       <div class="section-header">
         <h2 class="section-title">【 공지 】</h2>
-        <button @click="goToWritePost(1)">공지쓰기</button>
+        <button v-if="isAuthorized" @click="goToWritePost(1)">공지쓰기</button>
+        <button v-else @click="showPermissionAlert">공지쓰기</button>
       </div>
       <div class="notice-list">
         <div class="notice-item" v-for="(notice, index) in paginatedNotices" :key="index">
@@ -16,8 +17,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Bulletin Board Section -->
+    <!-- 게시판 -->
     <div class="bulletin-section">
       <div class="section-header">
         <h2 class="section-title">【 게시판 】</h2>
@@ -33,8 +33,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Unified Pagination -->
+    <!-- 페이지네이션 -->
     <div class="pagination">
       <p>페이지 {{ currentPage }} / {{ totalPages }}</p>
       <button class="pagination-button" @click="prevPage" :disabled="currentPage === 1">이전 페이지</button>
@@ -45,13 +44,15 @@
 
 <script>
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export default {
-  props: ["page"], // URL에서 전달받은 페이지 번호
+  props: ["page"],
   data() {
     return {
-      posts: [], // 실제 게시글 데이터를 저장
-      itemsPerPage: 1, // 페이지당 게시물 수 설정
+      posts: [],
+      itemsPerPage: 1,
+      isAuthorized: false, // 공지쓰기 권한 여부 상태
     };
   },
   computed: {
@@ -59,9 +60,9 @@ export default {
       return parseInt(this.page) || 1;
     },
     totalPages() {
-      const noticePages = Math.ceil(this.notices.length / 3);
-      const postPages = Math.ceil(this.posts.length / 9);
-      return Math.max(noticePages, postPages);
+      const noticePages = Math.ceil(this.notices.length / 3) || 0;
+      const postPages = Math.ceil(this.posts.length / 9) || 0;
+      return Math.max(Math.max(noticePages, postPages), 1);
     },
     notices() {
       return this.posts.filter(post => String(post.Notice) === "1");
@@ -82,24 +83,25 @@ export default {
   },
   methods: {
     async fetchPosts() {
-  try {
-    const response = await axios.get("http://localhost:3000/boardpage");
-    this.posts = response.data.map(post => ({
-      ...post,
-      Reg_Date: post.Reg_date, // 필드 이름 변환
-    }));
-  } catch (error) {
-    console.error("게시글 데이터를 가져오는 중 오류 발생:", error);
-  }
-},
-    formatDate(datetimeString) {
-      console.log("Formatting Date:", datetimeString); // 입력받은 데이터 출력
-      if (!datetimeString) return "N/A"; // 값이 없는 경우 처리
-      const [datePart, timePart] = datetimeString.split("T"); // 날짜와 시간 분리
-      if (!datePart || !timePart) return "N/A"; // 포맷이 이상하면 N/A 반환
-      const formattedDate = datePart; // 날짜 부분
-      const formattedTime = timePart.split(":").slice(0, 2).join(":"); // 시간 부분 (HH:MM)
-      return `${formattedDate} ${formattedTime}`;
+      try {
+        const response = await axios.get("http://localhost:3000/boardpage");
+        this.posts = response.data.map(post => ({
+          ...post,
+          Reg_Date: post.Reg_date,
+        }));
+      } catch (error) {
+        console.error("게시글 데이터를 가져오는 중 오류 발생:", error);
+      }
+    },
+    formatDate(dateString) {
+      console.log("date:");
+      console.log(dateString);
+      console.log(typeof(dateString));
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(
+        date.getHours()
+      ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -111,16 +113,24 @@ export default {
         this.$router.push({ name: "board", params: { page: this.currentPage - 1 } });
       }
     },
-    goToViewNotice(notice) {
+    goToViewNotice(post) {
       this.$router.push({
         name: "ViewPost",
-        query: { type: "notice", ...notice, page: this.currentPage },
+        query: {
+          uid: post.Uid, // `uid`로 전달
+          regDate: post.Reg_Date, // 정확한 날짜 필드
+          page: this.currentPage,
+        },
       });
     },
     goToViewPost(post) {
       this.$router.push({
         name: "ViewPost",
-        query: { type: "post", ...post, page: this.currentPage },
+        query: {
+          uid: post.Uid, // `uid`로 전달
+          regDate: post.Reg_Date, // 정확한 날짜 필드
+          page: this.currentPage,
+        },
       });
     },
     goToWritePost(noticeValue) {
@@ -129,12 +139,31 @@ export default {
         query: { Notice: noticeValue },
       });
     },
+    showPermissionAlert() {
+      alert("공지 쓰기 권한이 없습니다.");
+    },
+    checkUserAuth() {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const user = jwtDecode(token);
+          this.isAuthorized = user.auth === 1; // Auth 값으로 권한 확인
+        } catch (error) {
+          console.error("JWT 디코딩 오류:", error);
+          this.isAuthorized = false;
+        }
+      } else {
+        this.isAuthorized = false;
+      }
+    },
   },
   created() {
-    this.fetchPosts(); // 컴포넌트 생성 시 게시물 데이터 로드
+    this.fetchPosts();
+    this.checkUserAuth(); // 사용자 권한 확인
   },
 };
 </script>
+
 
 <style scoped>
 .container {
