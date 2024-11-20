@@ -1,4 +1,12 @@
-const MySQL = require('./Model');
+var mysql = require('mysql');
+
+var connection = mysql.createConnection({
+    connectionLimit: 5,
+    host: 'localhost',
+    user: 'root',
+    password: 'MySQLpass',
+    database: 'db_market',
+});
 
 exports.insertItems = (itemData, callback) => {
     const {
@@ -39,7 +47,7 @@ exports.insertItems = (itemData, callback) => {
         Group3,
     ];
 
-    MySQL.query(sql, values, (error, results) => {
+    connection.query(sql, values, (error, results) => {
         if (error) {
             console.error("Database Error: ", error);
             callback({ success: false, error });
