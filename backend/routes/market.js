@@ -11,10 +11,12 @@ var mypageController = require('../controllers/mypageController');
 var searchController = require('../controllers/searchController');
 var boardpageController = require('../controllers/boardpageController');
 var writepostController = require('../controllers/writepostController');
+var writeController = require('../controllers/writeController');
 
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
 router.get('/mypage', mypageController.getUserInformation);
+router.post('/write', writeController.insertItems);
 router.get('/search', searchController.searchItems);
 router.get('/boardpage', boardpageController.getBoardPosts);
 // Route for posting to writepost
