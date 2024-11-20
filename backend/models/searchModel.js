@@ -1,4 +1,12 @@
-const MySQL = require('./Model');
+var mysql = require('mysql');
+
+var connection = mysql.createConnection({
+    connectionLimit: 5,
+    host: 'localhost',
+    user: 'root',
+    password: 'MySQLpass',
+    database: 'db_market',
+});
 
 // 게시물 검색 함수
 exports.searchItems = (req, callback) => {
@@ -42,7 +50,7 @@ exports.searchItems = (req, callback) => {
     }
 
     // 쿼리 실행
-    MySQL.query(query, queryParams, (err, rows) => {
+    connection.query(query, queryParams, (err, rows) => {
         if (err) {
             console.error("게시물 검색 중 오류 발생:", err);
             callback(err, null);
