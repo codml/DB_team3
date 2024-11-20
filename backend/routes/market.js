@@ -14,7 +14,7 @@ var writepostController = require('../controllers/writepostController');
 
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
-router.post('/mypage', mypageController.getUser);
+router.get('/mypage', mypageController.getUserInformation);
 router.get('/search', searchController.searchItems);
 router.get('/boardpage', boardpageController.getBoardPosts);
 // Route for posting to writepost

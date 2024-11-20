@@ -1,58 +1,63 @@
 <template>
-  <div id="app">
-    <!-- 메인 섹션 -->
-    <main class="main-content">
-      <!-- 마이페이지 메뉴 -->
-      <aside class="sidebar">
-        <ul>
-          <li @click="navigate('회원정보수정')">회원정보수정</li>
-          <li @click="navigate('나의 판매 내역')">나의 판매 내역</li>
-          <li @click="navigate('나의 구매 내역')">나의 구매 내역</li>
-          <li @click="navigate('내가 찜한 상품')">내가 찜한 상품</li>
-        </ul>
-      </aside>
+	<div v-if="loading">Loading...</div>
+    <div v-else-if="error">{{ error }}</div>
+	<div v-else id="app">
+		<!-- 메인 섹션 -->
+		<main class="main-content">
+		<!-- 마이페이지 메뉴 -->
+		<aside class="sidebar">
+			<ul>
+			<li @click="navigate('회원정보수정')">회원정보수정</li>
+			<li @click="navigate('나의 판매 내역')">나의 판매 내역</li>
+			<li @click="navigate('나의 구매 내역')">나의 구매 내역</li>
+			<li @click="navigate('내가 찜한 상품')">내가 찜한 상품</li>
+			</ul>
+		</aside>
 
-      <!-- 사용자 프로필 -->
-      <section class="profile">
-        <h2>사용자 프로필</h2>
-        <div class="profile-content">
-          프로필 내용
-        </div>
-      </section>
-    </main>
-  </div>
+		<!-- 사용자 프로필 -->
+		<section class="profile">
+			<h2>사용자 프로필</h2>
+			<div class="profile-content"></div>
+		</section>
+		</main>
+	</div>
 </template>
 
 <script>
-//import axios from "axios";
+import axios from "axios";
 
 export default {
 	data() {
     return {
-      user: {}, // 회원 정보를 저장할 객체
-      loading: true, // 로딩 상태
+      user: null,         // 사용자 데이터 저장
+      loading: true,      // 로딩 상태
+      error: null         // 에러 메시지
     };
   },
   
-  methods: {
-    navigate(page) {
-      alert(`${page}로 이동합니다!`);
-    },
-  },
+   mounted() {
+    // Axios GET 요청
+    const token = localStorage.getItem('token'); // 토큰을 로컬 스토리지에서 가져오기
 
-  mounted() {
-    // 마이페이지에 접속하자마자 회원 정보 요청
-    // axios
-    //   .get("http://localhost:3000/mypage")
-    //   .then((response) => {
-    //     this.user = response.data; // 서버에서 받은 회원 정보 저장
-    //   })
-    //   .catch((error) => {
-    //     console.error("회원 정보 요청 실패:", error);
-    //   })
-    //   .finally(() => {
-    //     this.loading = false; // 로딩 상태 종료
-    //   });
+    axios.get('http://localhost:3000/mypage', {
+      headers: {
+        Authorization: `Bearer ${token}` // 인증 헤더 설정
+      }
+    })
+    .then(response => {
+      this.user = response.user; // 응답 데이터에서 사용자 정보 저장
+    })
+    .catch(err => {
+      console.error('Error fetching MyPage data:', err);
+      if (err.response && err.response.data) {
+        this.error = err.response.data.message || 'Failed to load data';
+      } else {
+        this.error = 'An unexpected error occurred';
+      }
+    })
+    .finally(() => {
+      this.loading = false; // 로딩 상태 종료
+    });
   }
 };
 </script>
