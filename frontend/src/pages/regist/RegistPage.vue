@@ -91,7 +91,7 @@ export default {
       previews: [],
       price: '',
       description: '',
-      Deal_way: 0, // 직거래를 기본값으로 설정
+      Deal_way: 1, // 직거래를 기본값으로 설정
       location: '',
       tags: '',
       mainCategory: '',
@@ -126,9 +126,7 @@ export default {
     },
     submitForm() {
       const token = localStorage.getItem('token');
-      console.log(token);
       const user = jwtDecode(token);
-      console.log(user);
 
       const formData = new FormData();
       formData.append('Uid', user.userID);
