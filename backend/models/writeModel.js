@@ -1,11 +1,4 @@
-var mysql = require('mysql');
-var connection = mysql.createConnection({
-	connectionLimit: 5,
-	host: 'localhost',
-	user: 'root',
-	password: 'MySQLpass',
-	database: 'db_market'
-});
+const MySQL = require('./Model');
 
 exports.insertItems = (itemData, callback) => {
     const {
@@ -46,7 +39,7 @@ exports.insertItems = (itemData, callback) => {
         Group3,
     ];
 
-    connection.query(sql, values, (error, results) => {
+    MySQL.query(sql, values, (error, results) => {
         if (error) {
             console.error("Database Error: ", error);
             callback({ success: false, error });
