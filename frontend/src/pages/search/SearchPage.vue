@@ -36,7 +36,6 @@
                   v-model="searchQuery"
                   placeholder="검색할 상품 제목 입력"
                 />
-                <button @click="fetchPosts">검색</button>
               </div>
             </div>
             <div class="input-group price-group">
@@ -54,14 +53,18 @@
                   placeholder="최대 가격"
                 />
               </div>
-              <button @click="fetchPosts">검색</button>
             </div>
           </div>
         </div>
 
+        <!-- 검색 버튼 -->
+        <div class="center-button">
+          <button class="search-button" @click="fetchPosts">검색</button>
+        </div>
+
         <div class="filter-buttons">
           <button @click="setSortOption('찜 많은 순')">찜 많은 순</button>
-          <button @click="setSortOption('좋아요 많은 순')">좋아요 많은 순</button>
+          <button @click="setSortOption('가격 순')">가격 순</button>
           <button @click="setSortOption('최신 순')">최신 순</button>
         </div>
       </section>
@@ -296,33 +299,28 @@ main {
   font-size: 14px;
 }
 
-.search-bar {
+.center-button {
   display: flex;
-  align-items: center;
-  gap: 10px; /* 검색창과 버튼 간격 */
+  justify-content: center;
+  margin-top: 20px;
 }
 
-.search-bar input {
-  flex: 1; /* 입력창이 버튼과 비율을 맞추어 확장 */
-  padding: 10px;
+.search-button {
+  width: 500px; /* 버튼 너비를 가로로 길게 설정 */
+  height: 30%; /* 버튼 높이를 얇게 설정 */
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.search-bar button {
-  padding: 10px 20px; /* 버튼의 가로와 세로 패딩 조정 */
-  font-size: 16px; /* 글씨 크기 조정 */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f8f8f8;
+  font-weight: bold;
+  background-color: #d3d3d3; /* 기본 회색 */
+  color: #000; /* 기본 검은색 텍스트 */
+  border: 2px solid #000; /* 검정색 테두리 */
+  border-radius: 0; /* 모서리를 둥글게 하지 않음 */
   cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-.search-bar button:hover {
-  background-color: #007bff;
-  color: #fff;
-  border-color: #007bff;
+.search-button:hover {
+  background-color: #42b983; /* 민트색 */
+  color: #fff; /* 호버 시 흰색 텍스트 */
 }
 
 .filter-buttons {
@@ -341,9 +339,10 @@ main {
 }
 
 .filter-buttons button:hover {
-  background-color: #007bff;
+  background-color: #42b983;
   color: #fff;
-  border-color: #007bff;
+  border-color: #42b983;
+  transition: 0.5s;
 }
 
 @media (max-width: 768px) {
@@ -387,7 +386,9 @@ main {
 }
 
 .product-card:hover {
-  border-color: #007bff; /* 마우스를 올렸을 때 테두리 색 변경 */
+  background-color: #42b983;
+  border-color: #42b983; /* 마우스를 올렸을 때 테두리 색 변경 */
+  transition: 0.5s;
 }
 
 .product-image {

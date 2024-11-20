@@ -43,7 +43,9 @@ exports.searchItems = (req, callback) => {
     if (req.sortOption) {
         if (req.sortOption === "최신 순") {
             query += ` ORDER BY Reg_date DESC`;
-        } else if (req.sortOption === "좋아요 많은 순" || req.sortOption === "찜 많은 순") {
+        } else if (req.sortOption === "가격 순") {
+            query += ` ORDER BY Price`;
+        } else if (req.sortOption === "찜 많은 순") {
             query += ` ORDER BY Like_cnt DESC`;
         }
     }
