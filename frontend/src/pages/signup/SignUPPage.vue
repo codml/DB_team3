@@ -75,7 +75,12 @@ export default {
         }
       } catch (error) {
         console.error('오류 발생:', error);
-        alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+		if(error.response.status === 409){
+			alert('이미 존재하는 아이디입니다.');
+			this.form.id = '';
+		}
+		else
+			alert('회원가입 중 오류가 발생했습니다.');
       }
     }
   }

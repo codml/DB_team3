@@ -8,17 +8,14 @@
     <div class="form-group row">
       <label for="photos">사진</label>
       <div class="photo-upload">
-        <!-- 숨겨진 파일 입력 필드 -->
         <input type="file" id="photos" accept="image/*" multiple @change="handleFileUpload" ref="fileInput" style="display: none;" />
-        <!-- 사용자 정의 버튼 -->
         <button type="button" @click="triggerFileInput">파일 선택</button>
         <div class="photo-previews">
-  <div v-for="(preview, index) in previews" :key="index" class="photo-item">
-    <img :src="preview" alt="미리보기 이미지" class="preview-image" />
-    <button type="button" @click="handleFileDelete(index)">삭제</button>
-  </div>
-</div>
-
+          <div v-for="(preview, index) in previews" :key="index" class="photo-item">
+            <img :src="preview" alt="미리보기 이미지" class="preview-image" />
+            <button type="button" @click="handleFileDelete(index)">삭제</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -34,15 +31,19 @@
 
     <div class="form-group row">
       <label>거래 방식</label>
-      <div class="trade-options">
-        <input type="checkbox" id="direct" v-model="isDirectTrade" />
-        <label for="direct">직거래</label>
-        <input type="checkbox" id="delivery" v-model="isDeliveryTrade" />
-        <label for="delivery">택배거래</label>
+      <div>
+        <label>
+          <input type="radio" v-model="Deal_way" :value="0" />
+          직거래
+        </label>
+        <label>
+          <input type="radio" v-model="Deal_way" :value="1" />
+          택배거래
+        </label>
       </div>
     </div>
 
-    <div v-if="isDirectTrade" class="form-group row">
+    <div v-if="Deal_way === 0" class="form-group row">
       <label for="location">거래희망장소</label>
       <div class="location-select">
         <input type="text" id="location" placeholder="거래희망장소를 입력해주세요" v-model="location" />
@@ -56,6 +57,22 @@
       </div>
     </div>
 
+    <!-- 대분류 입력란 -->
+    <div class="form-group row">
+      <label for="mainCategory">대분류</label>
+      <div class="category-select">
+        <input type="text" id="mainCategory" placeholder="대분류를 입력해주세요" v-model="mainCategory" />
+      </div>
+    </div>
+
+    <!-- 소분류 입력란 -->
+    <div class="form-group row">
+      <label for="subCategory">소분류</label>
+      <div class="category-select">
+        <input type="text" id="subCategory" placeholder="소분류를 입력해주세요" v-model="subCategory" />
+      </div>
+    </div>
+
     <div class="form-actions">
       <button class="register" @click="submitForm">등록하기</button>
     </div>
@@ -63,20 +80,23 @@
 </template>
 
 <script>
+import axios from "axios";
+import {jwtDecode} from "jwt-decode";
 export default {
   name: 'FormComponent',
   data() {
     return {
       title: '',
-      photos: [], // 파일 객체만 저장
-      previews: [], // 미리보기 URL만 저장
+      photos: [],
+      previews: [],
       price: '',
       description: '',
-      isDirectTrade: false,
-      isDeliveryTrade: false,
+      Deal_way: 1, // 직거래를 기본값으로 설정
       location: '',
       tags: '',
-      maxPhotos: 3, // 최대 업로드 가능 개수
+      mainCategory: '',
+      subCategory: '',
+      maxPhotos: 3,
     };
   },
   methods: {
@@ -92,63 +112,41 @@ export default {
 
       validFiles.slice(0, availableSlots).forEach(file => {
         const preview = URL.createObjectURL(file);
-        this.photos.push(file); // 파일 객체만 저장
-        this.previews.push(preview); // 미리보기 URL만 저장
+        this.photos.push(file);
+        this.previews.push(preview);
       });
     },
     triggerFileInput() {
       this.$refs.fileInput.click();
     },
     handleFileDelete(index) {
-      URL.revokeObjectURL(this.previews[index]); // 미리보기 URL 해제
-      this.photos.splice(index, 1); // 파일 삭제
-      this.previews.splice(index, 1); // 미리보기 URL 삭제
+      URL.revokeObjectURL(this.previews[index]);
+      this.photos.splice(index, 1);
+      this.previews.splice(index, 1);
     },
     submitForm() {
-      // 필수 필드 검증
-      if (!this.title.trim()) {
-        alert('제목을 입력해주세요.');
-        return;
-      }
-      if (this.photos.length === 0) {
-        alert('최소 1장의 사진을 업로드해야 합니다.');
-        return;
-      }
-      if (!this.price.trim()) {
-        alert('가격을 입력해주세요.');
-        return;
-      }
-      if (!this.description.trim()) {
-        alert('설명을 입력해주세요.');
-        return;
-      }
-      if (!this.isDirectTrade && !this.isDeliveryTrade) {
-        alert('직거래 또는 택배거래 중 하나를 선택해주세요.');
-        return;
-      }
-      if (this.isDirectTrade && !this.location.trim()) {
-        alert('직거래 선택 시 거래 희망 장소를 입력해주세요.');
-        return;
-      }
+      const token = localStorage.getItem('token');
+      const user = jwtDecode(token);
 
-      // FormData 객체로 데이터 준비
       const formData = new FormData();
-      formData.append('title', this.title);
-      formData.append('price', this.price);
-      formData.append('description', this.description);
-      formData.append('isDirectTrade', this.isDirectTrade);
-      formData.append('isDeliveryTrade', this.isDeliveryTrade);
-      formData.append('location', this.location);
-      formData.append('tags', this.tags);
-      
+      formData.append('Uid', user.userID);
+      formData.append('Title', this.title);
+      formData.append('Price', this.price);
+      formData.append('Content', this.description);
+      formData.append('Place', this.location);
+      formData.append('Group1', this.mainCategory);
+      formData.append('Group2', this.subCategory);
+      formData.append('Group3', this.tags); // tags를 Group3로 매핑
+      formData.append('Deal_way', this.Deal_way); // Deal_way 값을 그대로 전송
+
       this.photos.forEach((file, index) => {
-        formData.append(`photo${index + 1}`, file); // 파일만 추가
+        if (index === 0) formData.append('Image', file);
+        else if (index === 1) formData.append('Subimg1', file);
+        else if (index === 2) formData.append('Subimg2', file);
       });
 
-      // 서버로의 데이터 전송 (주석 처리)
-      /*
-      axios.post('/upload', formData)
-        .then(response => {
+      axios.post('http://localhost:3000/write', formData)
+        .then(() => {
           alert('등록 성공!');
           this.resetForm();
         })
@@ -156,26 +154,11 @@ export default {
           alert('등록 실패. 다시 시도해주세요.');
           console.error(error);
         });
-      */
-
-      console.log('Form Data:', {
-        title: this.title,
-        price: this.price,
-        description: this.description,
-        isDirectTrade: this.isDirectTrade,
-        isDeliveryTrade: this.isDeliveryTrade,
-        location: this.location,
-        tags: this.tags,
-        photos: this.photos,
-      });
-
-      // 입력 필드 초기화
-      this.resetForm();
     },
     resetForm() {
       this.title = '';
       this.photos = [];
-      this.previews.forEach(preview => URL.revokeObjectURL(preview)); // 모든 미리보기 URL 해제
+      this.previews.forEach(preview => URL.revokeObjectURL(preview));
       this.previews = [];
       this.price = '';
       this.description = '';
@@ -183,12 +166,12 @@ export default {
       this.isDeliveryTrade = false;
       this.location = '';
       this.tags = '';
+      this.mainCategory = '';
+      this.subCategory = '';
     },
   },
 };
-
 </script>
-
 
 
 <style scoped>
@@ -326,6 +309,22 @@ button.router-link-exact-active {
   border-radius: 4px;
   cursor: pointer;
   font-size: 10px;
+}
+
+.form-container {
+  width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+  border: solid black;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+}
+
+.category-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 </style>

@@ -5,12 +5,12 @@
 
   <div v-if="!isAuthPage" class="account">
     <div v-if="!isLoggedIn" class="sign">
-      <div class="login">
-        <router-link to="/login">로그인</router-link>
-      </div>
-      <div class="signup">
-        <router-link to="/signup">회원가입</router-link>
-      </div>
+		<div class="login">
+			<router-link to="/login">로그인</router-link>
+		</div>
+		<div class="signup">
+			<router-link to="/signup">회원가입</router-link>
+		</div>
     </div>
     <div v-else class="sign">
       <div class="logout">
