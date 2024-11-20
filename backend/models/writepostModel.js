@@ -1,4 +1,12 @@
-const MySQL = require('./Model');
+var mysql = require('mysql');
+
+var connection = mysql.createConnection({
+    connectionLimit: 5,
+    host: 'localhost',
+    user: 'root',
+    password: 'MySQLpass',
+    database: 'db_market',
+});
 
 exports.writePost = (postData, callback) => {
     const query = `
@@ -6,7 +14,7 @@ exports.writePost = (postData, callback) => {
       VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    MySQL.query(
+    connection.query(
         query,
         [
             postData.Uid,

@@ -1,8 +1,15 @@
-const MySQL = require('./Model');
+var mysql = require('mysql');
 
+var connection = mysql.createConnection({
+    connectionLimit: 5,
+    host: 'localhost',
+    user: 'root',
+    password: 'MySQLpass',
+    database: 'db_market',
+});
 exports.insertUser = (req, callback) => {
 	var sql = 'INSERT INTO usr (Uname, Age, Sex, Phone, Email, Address, Id, Passwd) VALUES (?, ?, ?, ?, ?, ?, ?, ?);';
-	MySQL.query(sql,
+	connection.query(sql,
 		[
 			req.name,
 			req.age,
@@ -33,7 +40,7 @@ exports.insertUser = (req, callback) => {
 exports.loginUser = (req, callback) => {
     console.log(req);
 
-    MySQL.query('SELECT * FROM usr WHERE Id = ?;', [req.userID], function(err, rows) {
+    connection.query('SELECT * FROM usr WHERE Id = ?;', [req.userID], function(err, rows) {
         if (err) {
             console.error("DB 오류:", err);
             callback('fail');
