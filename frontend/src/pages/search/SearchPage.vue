@@ -66,7 +66,6 @@
         </div>
       </section>
 
-
       <!-- 게시물 목록 -->
       <section class="product-grid">
         <template v-if="posts.length > 0">
@@ -77,14 +76,19 @@
             @click="redirectToRead(product.Ino)"
           >
             <div class="product-image">
-              <img :src="product.Image" alt="상품 이미지" />
+              <img
+                v-if="product.Image"
+                :src="`data:image/jpeg;base64,${product.Image}`"
+                alt="상품 이미지"
+              />
+              <div v-else class="no-image">이미지 없음</div>
             </div>
             <div class="product-info">
               <h3>{{ product.Title }}</h3>
               <p>가격: {{ product.Price }}원</p>
               <p>찜: ❤ {{ product.Like_cnt }}</p>
               <p>
-                [지역: {{ product.Place }} | 게시일: {{ product.Reg_date }} |
+                [지역: {{ product.Place }} | 게시일: {{ formatDate(product.Reg_date) }} |
                 분류: {{ product.Group1 }}]
               </p>
             </div>
@@ -158,11 +162,7 @@ export default {
         if (Array.isArray(response.data)) {
           this.allPosts = response.data.map(post => ({
             ...post,
-            Image: post.Image
-              ? `data:image/jpeg;base64,${btoa(
-                  new Uint8Array(post.Image).reduce((data, byte) => data + String.fromCharCode(byte), "")
-                )}`
-              : "",
+            Reg_date: post.Reg_date, // 날짜 형식 변환이 필요할 경우 추가
           }));
         } else {
           console.error("응답 데이터가 배열이 아닙니다.");
@@ -189,6 +189,11 @@ export default {
 
     redirectToRead(ino) {
       this.$router.push(`/read/${ino}`);
+    },
+
+    formatDate(dateString) {
+      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      return new Date(dateString).toLocaleDateString("ko-KR", options);
     },
   },
   mounted() {
