@@ -21,13 +21,15 @@ exports.getUserInformation = (req, res, next) => {
 	const decoded = jwt.verify(token, KEY);
 
 	// 유저 ID 추출
-	req.userID = decoded.userID;
-	console.log("userId: " + req.userID);
+	userID = decoded.userID;
 
 	// send ID to model
-	mypageModel.getUser(req, (status, user) => {
-		if(status === 'success')
+	mypageModel.getUser(userID, (status, user) => {
+		if(status === 'success'){
+			if (user.Profile_image)
+				user.Profile_image = Buffer.from(user.Profile_image).toString('base64');
 			return res.status(200).json({ message: 'Loading user information success', user: user });
+		}
 		else
 			return res.status(401).json({ message: status });
 	});

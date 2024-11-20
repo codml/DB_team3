@@ -10,10 +10,10 @@ const connection = mysql.createConnection({
 });
 
 
-exports.getUser = (req, callback) => {
-    console.log(req);
+exports.getUser = (userID, callback) => {
+	console.log("userId: " + userID);
 
-    connection.query('SELECT * FROM usr WHERE Id = ?;', [req.userID], function(err, rows) {
+    connection.query('SELECT * FROM usr WHERE Id = ?;', [userID], function(err, rows) {
         if (err) {
             console.error("DB 오류");
             callback('fail');
@@ -26,7 +26,7 @@ exports.getUser = (req, callback) => {
             return;
         }
 
-        const user = rows[0];
+		const user = rows[0];
 		callback('success', user); // 성공 시 사용자 데이터 반환
     });
 };
