@@ -22,9 +22,6 @@
             class="post-image"
           />
         </div>
-        <div v-else>
-          <p class="no-image">이미지가 없습니다.</p>
-        </div>
       </div>
     </div>
 
@@ -254,20 +251,32 @@ export default {
   margin-top: 20px;
 }
 
-.back-button,
+.back-button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: 1px solid black;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  background-color: #007bff;
+  transition: background-color 0.3s;
+}
 .edit-button {
   padding: 10px 20px;
   font-size: 14px;
   border: 1px solid black;
   border-radius: 4px;
   cursor: pointer;
-  background-color: #f1f1f1;
+  color: white;
+  background-color: green;
   transition: background-color 0.3s;
 }
+.back-button:hover {
+  background-color: blue;
+}
 
-.back-button:hover,
 .edit-button:hover {
-  background-color: #ddd;
+  background-color: darkgreen;
 }
 
 .delete-button {

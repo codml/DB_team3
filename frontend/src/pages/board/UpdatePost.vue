@@ -55,6 +55,7 @@
   </div>
 </template>
 
+
 <script>
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -68,10 +69,11 @@ export default {
         Uid: "",
         Content: "",
         Notice: "0",
+        Image: null, // 이미지 상태
       },
       photos: [], // 새로 업로드된 이미지
       previews: [], // 새로 업로드된 이미지의 미리보기 URL
-      originalImage: null, // 기존 이미지
+      originalImage: null, // 기존 이미지 식별자
     };
   },
   created() {
@@ -106,77 +108,82 @@ export default {
       this.$refs.fileInput.click();
     },
     handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (file && file.type.startsWith("image/")) {
-    this.photos = [file];
-    this.previews = [URL.createObjectURL(file)];
-    this.originalImage = null; // 새 이미지를 업로드하면 기존 이미지를 제거
-  } else {
-    alert("이미지만 업로드할 수 있습니다.");
-  }
-},
-    handleFileDelete() {
-      this.photos = [];
-      this.previews = [];
-      this.originalImage = null; // 이미지를 삭제하면 기존 이미지를 제거
+      const file = event.target.files[0];
+      if (file && file.type.startsWith("image/")) {
+        this.photos = [file];
+        this.previews = [URL.createObjectURL(file)];
+        this.originalImage = null; // 새 이미지를 업로드하면 기존 이미지를 제거
+        this.form.Image = null; // 새 이미지를 업로드하므로 삭제 상태 초기화
+      } else {
+        alert("이미지만 업로드할 수 있습니다.");
+      }
     },
+    handleFileDelete() {
+    this.photos = [];
+    this.previews = [];
+    this.originalImage = null;
+    this.form.Image = "delete"; // 명시적으로 삭제 표시
+},
     async updatePost() {
-  if (!this.form.Title.trim() || !this.form.Content.trim()) {
-    alert("제목과 내용을 모두 입력해주세요.");
-    return;
-  }
+      if (!this.form.Title.trim() || !this.form.Content.trim()) {
+        alert("제목과 내용을 모두 입력해주세요.");
+        return;
+      }
 
-  const now = new Date();
-  this.form.Reg_Date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
-    now.getDate()
-  ).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(
-    now.getSeconds()
-  ).padStart(2, "0")}`;
+      const now = new Date();
+      this.form.Reg_Date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+        now.getDate()
+      ).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+        now.getSeconds()
+      ).padStart(2, "0")}`;
 
-  try {
-    const formData = new FormData();
-    formData.append("Uid", this.form.Uid); // 작성자
-    formData.append("Reg_date", this.$route.query.regDate); // 기존 작성 시간
-    formData.append("Title", this.form.Title); // 수정된 제목
-    formData.append("Content", this.form.Content); // 수정된 내용
-    formData.append("New_Reg_date", this.form.Reg_Date); // 새로운 작성 시간
+      try {
+        const formData = new FormData();
+        formData.append("Uid", this.form.Uid); // 작성자
+        formData.append("Reg_date", this.$route.query.regDate); // 기존 작성 시간
+        formData.append("Title", this.form.Title); // 수정된 제목
+        formData.append("Content", this.form.Content); // 수정된 내용
+        formData.append("New_Reg_date", this.form.Reg_Date); // 새로운 작성 시간
 
-    // 이미지 처리
-    if (this.photos.length > 0) {
-      // 새로 업로드된 이미지가 있으면 추가
-      formData.append("Image", this.photos[0]);
-    } else if (this.originalImage) {
-      // 기존 이미지를 유지
-      formData.append("Image", this.originalImage); // 기존 이미지(Base64)
-    } else {
-      // 이미지가 없으면 null로 처리
-      formData.append("Image", null);
-    }
+        // 이미지 처리
+        if (this.photos.length > 0) {
+          // 새로 업로드된 이미지가 있으면 추가
+          formData.append("Image", this.photos[0]);
+        } else if (this.form.Image === "delete") {
+          // 이미지 삭제 요청
+          formData.append("Image", "delete");
+        } else if (this.originalImage) {
+          // 기존 이미지를 유지
+          formData.append("Image", "original");
+        } else {
+          // 이미지가 없으면 null로 처리
+          formData.append("Image", null);
+        }
 
-    await axios.put("http://localhost:3000/updatepost", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+        await axios.put("http://localhost:3000/updatepost", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
-    alert("게시글이 성공적으로 수정되었습니다.");
+        alert("게시글이 성공적으로 수정되었습니다.");
 
-    // 수정된 게시글로 이동
-    this.$router.push({
-      name: "ViewPost",
-      query: {
-        uid: this.form.Uid,
-        regDate: this.form.Reg_Date, // 새로운 작성 시간으로 이동
-      },
-    });
-  } catch (error) {
-    console.error("게시글 수정 오류:", error.response?.data);
-    alert(error.response?.data?.error || "게시글 수정 중 오류가 발생했습니다.");
-  }
-}
-
-
+        // 수정된 게시글로 이동
+        this.$router.push({
+          name: "ViewPost",
+          query: {
+            uid: this.form.Uid,
+            regDate: this.form.Reg_Date, // 새로운 작성 시간으로 이동
+          },
+        });
+      } catch (error) {
+        console.error("게시글 수정 오류:", error.response?.data);
+        alert(error.response?.data?.error || "게시글 수정 중 오류가 발생했습니다.");
+      }
+    },
   },
 };
 </script>
+
+
 
 
 <style scoped>

@@ -9,25 +9,35 @@ var connection = mysql.createConnection({
 });
 
 exports.fetchAllPosts = (callback) => {
-    const query = `
+    const noticeQuery = `
         SELECT Uid, Title, Content, Image, Notice,
         DATE_FORMAT(Reg_date, '%Y-%m-%d %H:%i:%s') AS Reg_date
-        FROM board ORDER BY Notice DESC, Reg_date DESC;
+        FROM board WHERE Notice = 1 ORDER BY Reg_date DESC;
+    `;
+    const generalPostQuery = `
+        SELECT Uid, Title, Content, Image, Notice,
+        DATE_FORMAT(Reg_date, '%Y-%m-%d %H:%i:%s') AS Reg_date
+        FROM board WHERE Notice = 0 ORDER BY Reg_date DESC;
     `;
 
-    connection.query(query, (err, rows) => {
-        if (err) {
-            console.error('SQL Error:', err);
-            callback({ success: false, message: 'DB Fetch Error', error: err });
+    // Execute both queries in parallel
+    connection.query(noticeQuery, (noticeErr, noticeRows) => {
+        if (noticeErr) {
+            console.error('Notice SQL Error:', noticeErr);
+            callback({ success: false, message: 'DB Fetch Error', error: noticeErr });
             return;
         }
 
-        // Convert image buffers to base64 strings
-        const processedRows = rows.map(row => {
-            return row;
-        });
+        connection.query(generalPostQuery, (postErr, postRows) => {
+            if (postErr) {
+                console.error('Post SQL Error:', postErr);
+                callback({ success: false, message: 'DB Fetch Error', error: postErr });
+                return;
+            }
 
-        console.log("Fetched Data:", processedRows); // 데이터 확인
-        callback({ success: true, data: processedRows });
+            // Combine and return results
+            const combinedRows = [...noticeRows, ...postRows];
+            callback({ success: true, data: combinedRows });
+        });
     });
 };
