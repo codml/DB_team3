@@ -106,15 +106,15 @@ export default {
       this.$refs.fileInput.click();
     },
     handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file && file.type.startsWith("image/")) {
-        this.photos = [file];
-        this.previews = [URL.createObjectURL(file)];
-        this.originalImage = null; // 새 이미지를 업로드하면 기존 이미지를 제거
-      } else {
-        alert("이미지만 업로드할 수 있습니다.");
-      }
-    },
+  const file = event.target.files[0];
+  if (file && file.type.startsWith("image/")) {
+    this.photos = [file];
+    this.previews = [URL.createObjectURL(file)];
+    this.originalImage = null; // 새 이미지를 업로드하면 기존 이미지를 제거
+  } else {
+    alert("이미지만 업로드할 수 있습니다.");
+  }
+},
     handleFileDelete() {
       this.photos = [];
       this.previews = [];
@@ -141,11 +141,16 @@ export default {
     formData.append("Content", this.form.Content); // 수정된 내용
     formData.append("New_Reg_date", this.form.Reg_Date); // 새로운 작성 시간
 
-    // 이미지가 새로 업로드된 경우 처리
+    // 이미지 처리
     if (this.photos.length > 0) {
-      formData.append("Image", this.photos[0]); // 새로운 이미지
-    } else if (this.previews.length > 0) {
-      formData.append("Image", this.previews[0]); // 기존 이미지(Base64)
+      // 새로 업로드된 이미지가 있으면 추가
+      formData.append("Image", this.photos[0]);
+    } else if (this.originalImage) {
+      // 기존 이미지를 유지
+      formData.append("Image", this.originalImage); // 기존 이미지(Base64)
+    } else {
+      // 이미지가 없으면 null로 처리
+      formData.append("Image", null);
     }
 
     await axios.put("http://localhost:3000/updatepost", formData, {
@@ -167,6 +172,7 @@ export default {
     alert(error.response?.data?.error || "게시글 수정 중 오류가 발생했습니다.");
   }
 }
+
 
   },
 };

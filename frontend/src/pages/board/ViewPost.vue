@@ -1,37 +1,34 @@
 <template>
   <div class="view-post-container">
-    <h2>게시글 보기</h2>
-
-    <!-- 게시글 정보 섹션 -->
+    <!-- 게시글 정보 -->
     <div class="post-info">
-      <div class="post-title">
-        <strong>{{ post.Title }}</strong>
+      <div class="post-title-meta">
+        <div class="post-title">{{ post.Title }}</div>
+        <div class="post-meta">
+          {{ post.Uid }} <br />
+          {{ formatDate(post.Reg_date) }}
+        </div>
       </div>
-      <div class="post-meta">
-        <span class="post-author">작성자: {{ post.Uid }}</span>
-        <span class="post-time">작성 시간: {{ formatDate(post.Reg_date) }}</span>
-      </div>
+      <!-- 본문 내용 -->
       <div class="post-content">
-        <p>{{ post.Content }}</p>
+        {{ post.Content }}
+      </div>
+      <!-- 이미지 -->
+      <div class="post-image-container">
+        <div v-if="post.Image && typeof post.Image === 'string'">
+          <img
+            :src="`data:image/jpeg;base64,${post.Image}`"
+            alt="첨부 이미지"
+            class="post-image"
+          />
+        </div>
+        <div v-else>
+          <p class="no-image">이미지가 없습니다.</p>
+        </div>
       </div>
     </div>
 
-    <!-- 이미지 섹션 -->
-    <div class="post-image-container">
-      <div v-if="post.Image && typeof post.Image === 'string'">
-        <!-- 이미지 렌더링 -->
-        <img
-          :src="`data:image/jpeg;base64,${post.Image}`"
-          alt="첨부 이미지"
-          class="post-image"
-        />
-      </div>
-      <div v-else>
-        <p class="no-image"></p>
-      </div>
-    </div>
-
-    <!-- 버튼 -->
+    <!-- 버튼 섹션 -->
     <div class="button-container">
       <button class="back-button" @click="goBack">목록으로</button>
       <button
@@ -182,50 +179,52 @@ export default {
 
 
 
-
 <style scoped>
 .view-post-container {
-  width: 963px;
+  width: 960px;
   margin: 20px auto;
   padding: 20px;
   border-style: solid;
   border-color: black;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 }
 
-/* 게시글 정보 섹션 스타일 */
-.post-info {
+/* 게시글 제목과 작성자/작성일 */
+.post-title-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 20px;
 }
 
 .post-title {
-  border: 1px solid #000;
-  padding: 10px;
-  margin-bottom: 20px;
-  text-align: center;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: bold;
+  text-align: left; /* 좌측 정렬 */
 }
 
 .post-meta {
-  text-align: right;
+  text-align: right; /* 작성자/작성일 우측 정렬 */
   font-size: 14px;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-.post-content {
-  border: 1px solid #000;
-  padding: 20px;
-  height: 300px;
-  overflow-y: auto;
-  font-size: 16px;
+  color: black; /* 검정 글씨로 변경 */
   line-height: 1.5;
 }
 
-/* 이미지 섹션 스타일 */
+/* 본문 내용 */
+.post-content {
+  border: 1px solid #000;
+  padding: 20px;
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-wrap: break-word; /* 긴 단어를 줄 바꿈 */
+  background-color: #fff; /* 배경색을 하얀색으로 변경 */
+  min-height: 150px; /* 최소 높이 설정 */
+  text-align: left; /* 좌측 정렬 */
+}
+
+/* 이미지 섹션 */
 .post-image-container {
   margin-top: 20px;
   text-align: center;
@@ -233,22 +232,25 @@ export default {
 
 .post-image {
   max-width: 100%;
-  max-height: 500px; /* 최대 높이를 제한 */
-  object-fit: contain; /* 이미지가 잘리지 않도록 조절 */
+  max-height: 300px; /* 최대 높이 제한 */
+  object-fit: contain; /* 이미지 비율 유지 */
   border: 1px solid #ddd;
   border-radius: 5px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin: 10px 0;
 }
 
+/* 이미지가 없을 때 */
 .no-image {
   font-size: 14px;
   color: gray;
+  margin-top: 20px;
 }
 
-/* 버튼 섹션 스타일 */
+/* 버튼 섹션 */
 .button-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; /* 버튼 오른쪽 정렬 */
+  gap: 10px; /* 버튼 간격 */
   margin-top: 20px;
 }
 
@@ -256,7 +258,7 @@ export default {
 .edit-button {
   padding: 10px 20px;
   font-size: 14px;
-  border: 1px solid #000;
+  border: 1px solid black;
   border-radius: 4px;
   cursor: pointer;
   background-color: #f1f1f1;
@@ -267,6 +269,7 @@ export default {
 .edit-button:hover {
   background-color: #ddd;
 }
+
 .delete-button {
   color: white;
   background-color: red;
@@ -278,23 +281,8 @@ export default {
   transition: background-color 0.3s;
 }
 
-.edit-button {
-  color: white;
-  background-color: green;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  margin-left: 0%;
-  transition: background-color 0.3s;
-}
-
 .delete-button:hover {
   background-color: darkred;
 }
-
-.edit-button:hover {
-  background-color: darkgreen;
-}
 </style>
+
