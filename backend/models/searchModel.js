@@ -55,7 +55,7 @@ exports.searchItems = (req, callback) => {
             console.error("게시물 검색 중 오류 발생:", err);
             callback(err, null);
         } else {
-            console.log("검색 결과:", JSON.stringify(rows));
+            // console.log("검색 결과:", JSON.stringify(rows));
             callback(null, rows);
         }
     });

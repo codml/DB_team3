@@ -17,7 +17,7 @@ exports.searchItems = (req, res) => {
                     : null
             }));
 
-            console.log("검색 결과:", JSON.stringify(modifiedRows));
+            // console.log("검색 결과:", JSON.stringify(modifiedRows));
             res.json(modifiedRows); // 수정된 데이터 전송
         }
     });
