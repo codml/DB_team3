@@ -1,57 +1,68 @@
 <template>
   <div class="container">
-    <!-- Notice Section -->
-    <div class="notice-section">
+    <div class="post-section">
       <div class="section-header">
-        <h2 class="section-title">【 공지 】</h2>
-        <button @click="$router.push({ name: 'WritePost' })">글쓰기</button>
+        <h2 class="section-title">자유게시판</h2>
+        <button @click="goToWritePost">글쓰기</button>
       </div>
-      <div class="notice-list">
-        <div class="notice-item" v-for="(notice, index) in paginatedNotices" :key="index">
-          <div class="notice-title">
-            <a href="#" @click.prevent="goToViewNotice(notice)">{{ notice.Title }}</a>
-          </div>
-          <div class="notice-author">{{ notice.Uid }}</div>
-          <div class="notice-time">({{ notice.Reg_Date }})</div>
-        </div>
-      </div>
+      <!-- Table for posts -->
+      <table class="post-table">
+        <thead>
+          <tr>
+            <th class="title-column">제목</th>
+            <th class="author-column">작성자</th>
+            <th class="date-column">작성일</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(post, index) in paginatedPosts"
+            :key="index"
+            :class="{ notice: post.Notice === 1 || post.Notice === '1' }"
+          >
+            <td class="post-title">
+              <a href="#" @click.prevent="goToViewPost(post)">
+                <span v-if="post.Notice === 1 || post.Notice === '1'" class="notice-badge">공지</span>
+                {{ post.Title }}
+              </a>
+              <span v-if="post.CommentCount" class="comment-count">
+                [{{ post.CommentCount }}]
+              </span>
+            </td>
+            <td class="post-author">{{ post.Uid }}</td>
+            <td class="post-time">{{ formatDate(post.Reg_Date) }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <!-- Bulletin Board Section -->
-    <div class="bulletin-section">
-      <div class="section-header">
-        <h2 class="section-title">【 게시판 】</h2>
-        <button @click="$router.push({ name: 'WritePost' })">글쓰기</button>
-      </div>
-      <div class="bulletin-list">
-        <div class="bulletin-item" v-for="(post, index) in paginatedPosts" :key="index">
-          <div class="bulletin-title">
-            <a href="#" @click.prevent="goToViewPost(post)">{{ post.Title }}</a>
-          </div>
-          <div class="bulletin-author">{{ post.Uid }}</div>
-          <div class="bulletin-time">({{ post.Reg_Date }})</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Unified Pagination -->
     <div class="pagination">
       <p>페이지 {{ currentPage }} / {{ totalPages }}</p>
-      <button class="pagination-button" @click="prevPage" :disabled="currentPage === 1">이전 페이지</button>
-      <button class="pagination-button" @click="nextPage" :disabled="currentPage === totalPages">다음 페이지</button>
+      <button
+        class="pagination-button"
+        @click="prevPage"
+        :disabled="currentPage === 1"
+      >
+        이전 페이지
+      </button>
+      <button
+        class="pagination-button"
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+      >
+        다음 페이지
+      </button>
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 
 export default {
-  props: ["page"], // URL에서 전달받은 페이지 번호
+  props: ["page"],
   data() {
     return {
-      posts: [], // 실제 게시글 데이터를 저장
-      itemsPerPage: 1, // 페이지당 게시물 수 설정
+      posts: [], // 전체 게시글
+      itemsPerPage: 10, // 페이지당 항목 수
     };
   },
   computed: {
@@ -59,67 +70,83 @@ export default {
       return parseInt(this.page) || 1;
     },
     totalPages() {
-      const noticePages = Math.ceil(this.notices.length / 3);
-      const postPages = Math.ceil(this.posts.length / 9);
-      return Math.max(noticePages, postPages);
+      return Math.ceil(this.sortedPosts.length / this.itemsPerPage) || 1;
     },
-    notices() {
-      // Notice 값을 문자열로 변환하여 필터링
-      return this.posts.filter(post => String(post.Notice) === "1");
-    },
-    paginatedNotices() {
-      const start = (this.currentPage - 1) * 3;
-      const end = start + 3;
-      return this.notices.slice(start, end);
-    },
-    generalPosts() {
-      // Notice 값이 0인 게시글 필터링
-      return this.posts.filter(post => String(post.Notice) === "0");
+    sortedPosts() {
+      return [...this.posts].sort((a, b) => {
+        // Notice 값을 숫자로 비교
+        if (a.Notice === 1 && b.Notice === 0) return -1;
+        if (a.Notice === 0 && b.Notice === 1) return 1;
+        return new Date(b.Reg_date) - new Date(a.Reg_date);
+      });
     },
     paginatedPosts() {
-      const start = (this.currentPage - 1) * 9;
-      const end = start + 9;
-      return this.generalPosts.slice(start, end);
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.sortedPosts.slice(start, end);
     },
   },
   methods: {
     async fetchPosts() {
       try {
         const response = await axios.get("http://localhost:3000/boardpage");
-        console.log("Fetched posts:", response.data); // 데이터를 확인하기 위한 출력
-        this.posts = response.data;
+        console.log("Fetched posts:", response.data);
+        this.posts = response.data.map((post) => ({
+          ...post,
+          Notice: post.Notice, // Notice 값 유지
+          Reg_Date: post.Reg_date, // Reg_Date 매핑
+        }));
+        console.log("Processed posts:", this.posts); // 변환 후 데이터 확인
       } catch (error) {
         console.error("게시글 데이터를 가져오는 중 오류 발생:", error);
       }
     },
+    formatDate(dateString) {
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(date.getDate()).padStart(2, "0")} ${String(
+        date.getHours()
+      ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    },
     nextPage() {
       if (this.currentPage < this.totalPages) {
-        this.$router.push({ name: "board", params: { page: this.currentPage + 1 } });
+        this.$router.push({
+          name: "board",
+          params: { page: this.currentPage + 1 },
+        });
       }
     },
     prevPage() {
       if (this.currentPage > 1) {
-        this.$router.push({ name: "board", params: { page: this.currentPage - 1 } });
+        this.$router.push({
+          name: "board",
+          params: { page: this.currentPage - 1 },
+        });
       }
-    },
-    goToViewNotice(notice) {
-      this.$router.push({
-        name: "ViewPost",
-        query: { type: "notice", ...notice, page: this.currentPage },
-      });
     },
     goToViewPost(post) {
       this.$router.push({
         name: "ViewPost",
-        query: { type: "post", ...post, page: this.currentPage },
+        query: {
+          uid: post.Uid,
+          regDate: post.Reg_Date,
+          page: this.currentPage,
+        },
       });
+    },
+    goToWritePost() {
+      this.$router.push({ name: "WritePost" });
     },
   },
   created() {
-    this.fetchPosts(); // 컴포넌트 생성 시 게시물 데이터 로드
+    this.fetchPosts();
   },
 };
 </script>
+
 
 <style scoped>
 .container {
@@ -129,8 +156,7 @@ export default {
   font-family: Arial, sans-serif;
 }
 
-.notice-section,
-.bulletin-section {
+.post-section {
   border-style: solid;
   border-color: black;
   border-radius: 10px;
@@ -140,33 +166,100 @@ export default {
 
 .section-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* 좌우 정렬 */
   align-items: center;
   margin-bottom: 15px;
 }
 
+button {
+  font-size: 16px; /* 버튼 글씨 크기 */
+  padding: 10px 20px; /* 버튼 크기 조정 */
+  background-color: #007bff; /* 버튼 배경색 */
+  color: white; /* 버튼 글씨색 */
+  border: none; /* 테두리 제거 */
+  border-radius: 4px; /* 둥근 모서리 */
+  cursor: pointer; /* 커서 변경 */
+}
+
+button:hover {
+  background-color: #0056b3; /* 호버 시 색상 변경 */
+}
+
 .section-title {
-  font-size: 20px;
+  font-size: 40px;
   font-weight: bold;
 }
 
-.notice-list,
-.bulletin-list {
-  margin-top: 10px;
+.post-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
 }
 
-.notice-item,
-.bulletin-item {
+.post-table th,
+.post-table td {
   border: 1px solid #ccc;
   padding: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
 }
 
-.notice-title,
-.bulletin-title {
+.post-table th.title-column {
+  width: 60%; /* 제목 칸 */
+}
+
+.post-table th.author-column {
+  width: 20%; /* 작성자 칸 */
+  text-align: right; /* 오른쪽 정렬 */
+}
+
+.post-table th.date-column {
+  width: 20%; /* 작성일 칸 */
+  text-align: right; /* 오른쪽 정렬 */
+}
+
+.post-table td.post-title {
+  text-align: left;
+}
+
+.post-table td.post-author {
+  text-align: right; /* 작성자 데이터 오른쪽 정렬 */
+}
+
+.post-table td.post-time {
+  text-align: right; /* 작성일 데이터 오른쪽 정렬 */
+}
+
+.post-table tr {
+  transition: background-color 0.3s ease;
+}
+
+.post-table tr:hover {
+  background-color: #f1f1f1; /* 호버 시 더 밝은 색상 */
+}
+
+.post-table tr.notice {
+  font-weight: bold; /* 공지사항 굵은 글씨 */
+  background-color: #f9f9f9; /* 공지사항 배경색 */
+}
+
+.post-table tr.notice td {
+  font-weight: bold; /* 공지사항의 모든 열 굵게 */
+  color: #333; /* 텍스트 색상 */
+}
+
+.post-title a {
+  text-decoration: none; /* 제목 밑줄 제거 */
+  color: black; /* 제목 색상 검정으로 설정 */
+  cursor: pointer;
+}
+
+.post-title a:hover {
+  text-decoration: underline; /* 제목에 마우스 호버 시 밑줄 추가 */
+}
+
+.notice-badge {
+  color: red;
   font-weight: bold;
+  margin-right: 5px;
 }
 
 .pagination {
@@ -182,5 +275,25 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   margin: 0 5px;
+}
+
+.pagination-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.pagination-button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+.pagination-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
 }
 </style>
