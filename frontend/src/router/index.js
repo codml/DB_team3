@@ -16,6 +16,26 @@ const routes = [
     component: () => import('../pages/mypage/UserPage/MyPage.vue')
   },
   {
+    path: '/mypage/edit',
+    name: 'mypageedit',
+    component: () => import('../pages/mypage/UserPage/MyPageEdit.vue')
+  },
+  {
+    path: '/mypage/sale',
+    name: 'mysale',
+    component: () => import('../pages/mypage/UserPage/MyPageEdit.vue')
+  },
+  {
+    path: '/mypage/purchase',
+    name: 'mypurchase',
+    component: () => import('../pages/mypage/UserPage/MyPageEdit.vue')
+  },
+  {
+    path: '/mypage/likelist',
+    name: 'mylike',
+    component: () => import('../pages/mypage/UserPage/MyPageEdit.vue')
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../pages/login/LoginPage.vue')
@@ -24,7 +44,6 @@ const routes = [
     path: '/signup',
     name: 'signup',
     component: () => import('../pages/signup/SignUPPage.vue')
-
   },
   {
     path: '/search',
