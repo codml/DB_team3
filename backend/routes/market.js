@@ -9,6 +9,7 @@ var signupController = require('../controllers/signupController');
 var loginController = require('../controllers/loginController');
 var mypageController = require('../controllers/mypageController');
 var searchController = require('../controllers/searchController');
+var writeController = require('../controllers/writeController');
 var boardpageController = require('../controllers/boardpageController');
 var writepostController = require('../controllers/writepostController');
 var viewpostController = require("../controllers/viewpostController");
