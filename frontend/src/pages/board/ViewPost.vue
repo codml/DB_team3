@@ -16,6 +16,21 @@
       </div>
     </div>
 
+    <!-- 이미지 섹션 -->
+    <div class="post-image-container">
+      <div v-if="post.Image && typeof post.Image === 'string'">
+        <!-- 이미지 렌더링 -->
+        <img
+          :src="`data:image/jpeg;base64,${post.Image}`"
+          alt="첨부 이미지"
+          class="post-image"
+        />
+      </div>
+      <div v-else>
+        <p class="no-image"></p>
+      </div>
+    </div>
+
     <!-- 버튼 -->
     <div class="button-container">
       <button class="back-button" @click="goBack">목록으로</button>
@@ -50,6 +65,7 @@ export default {
         Uid: "",
         Reg_date: "",
         Content: "",
+        Image: null, // 이미지 추가
       },
       id: null,
       auth: null, // 사용자 Auth 정보
@@ -58,15 +74,12 @@ export default {
   },
   computed: {
     canDeletePost() {
-      // 본인 글 삭제 권한
       return this.id === this.post.Uid;
     },
     canEditPost() {
-      // 본인 글 수정 권한
       return this.id === this.post.Uid;
     },
     isAdmin() {
-      // 관리자 권한
       return this.auth === 1;
     },
   },
@@ -115,11 +128,15 @@ export default {
       this.$router.push({ name: "board", params: { page: this.previousPage } });
     },
     goToUpdatePost() {
+      console.log("수정하기 버튼 클릭");
       this.$router.push({
         name: "UpdatePost",
         query: {
           uid: this.post.Uid,
           regDate: this.post.Reg_date,
+          title: this.post.Title,
+          content: this.post.Content,
+          images: this.post.Image ? [`data:image/jpeg;base64,${this.post.Image}`] : [],
         },
       });
     },
@@ -136,7 +153,7 @@ export default {
         await axios.delete("http://localhost:3000/deletepost", {
           data: {
             uid: this.post.Uid,
-            regDate: this.post.Reg_date, // 그대로 전달
+            regDate: this.post.Reg_date,
           },
         });
 
@@ -154,17 +171,19 @@ export default {
         "0"
       )}-${String(date.getDate()).padStart(2, "0")} ${String(
         date.getHours()
-      ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(
-        date.getSeconds()
-      ).padStart(2, "0")}`;
+      ).padStart(2, "0")}:${String(date.getMinutes()).padStart(
+        2,
+        "0"
+      )}:${String(date.getSeconds()).padStart(2, "0")}`;
     },
   },
 };
 </script>
 
 
+
+
 <style scoped>
-/* 기존 스타일 유지 */
 .view-post-container {
   width: 963px;
   margin: 20px auto;
@@ -267,6 +286,7 @@ export default {
   padding: 10px 20px;
   font-size: 14px;
   cursor: pointer;
+  margin-left: 0%;
   transition: background-color 0.3s;
 }
 

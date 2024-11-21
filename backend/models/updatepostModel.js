@@ -7,14 +7,29 @@ const connection = mysql.createConnection({
     database: "db_market",
 });
 
-connection.connect((err) => {
-    if (err) {
-        console.error('MySQL 연결 실패:', err);
-        return;
-    }
-    console.log('MySQL 연결 성공');
-});
+exports.updatePost = (postData) => {
+    return new Promise((resolve, reject) => {
+        const { Uid, Reg_date, Title, Content, Image, New_Reg_date } = postData;
 
-module.exports = {
-    connection
+        // Update query to modify the board post
+        const sql = `
+      UPDATE board
+      SET Title = ?, Content = ?, Image = ?, Reg_date = ?
+      WHERE Uid = ? AND Reg_date = ?
+    `;
+
+        // Execute the query
+        connection.query(
+            sql,
+            [Title, Content, Image, New_Reg_date, Uid, Reg_date],
+            (error, results) => {
+                if (error) {
+                    console.error("Error executing update query:", error);
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            }
+        );
+    });
 };
