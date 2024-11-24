@@ -5,7 +5,7 @@ var dotenv = require('dotenv');
 dotenv.config();
 const KEY = process.env.SECRET_KEY;
 
-exports.loginUser = (req, res, next) => {
+exports.loginUser = (req, res) => {
     console.log("req: " + JSON.stringify(req.body));
     userModel.loginUser(req.body, (status, user) => { // 콜백이 상태와 사용자 데이터를 반환
         if (status === 'success') {

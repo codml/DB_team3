@@ -27,6 +27,6 @@ router.post('/writepost', upload.single('Image'), writepostController.writePost)
 router.get("/viewpost/", viewpostController.getPost);
 router.put('/updatepost', upload.single('Image'), updatepostController.updatePost);
 router.delete('/deletepost', deletepostController.deletePost);
-router.get('/main', mapController.getMap);
+router.post('/map', mapController.getMap);
 
 module.exports = router;

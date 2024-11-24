@@ -20,9 +20,7 @@
 <script>
 import axios from 'axios';
 
-// 환경 변수에서 네이버 클라이언트 ID와 비밀 키를 불러옵니다.
 const NAVER_CLIENT_ID = process.env.VUE_APP_NAVER_CLIENT_ID;
-const NAVER_CLIENT_SECRET = process.env.VUE_APP_NAVER_CLIENT_SECRET;
 
 // selint error 해결
 /* eslint-disable */
@@ -50,6 +48,14 @@ export default {
           center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 좌표
           zoom: 10,
         });
+
+        const marker = new naver.maps.Marker({
+            position: new naver.maps.LatLng(37.5665, 126.9780),
+            map: this.map,
+        });
+
+        // 줌 레벨을 설정
+        this.map.setZoom(17);
       } else {
         console.error('네이버 지도 API 로드 실패');
         alert('네이버 지도 API 로드 실패');
@@ -57,24 +63,19 @@ export default {
     },
 
     // 장소 검색 및 마커 표시
-    async searchPlace() {
+    async searchPlace() { 
       if (!this.searchQuery) return alert('검색어를 입력하세요.');
 
       console.log(this.searchQuery);
 
       try {
-        const response = await axios.get('https://openapi.naver.com/v1/search/local.json', {
-          headers: {
-            'X-Naver-Client-Id': NAVER_CLIENT_ID,
-            'X-Naver-Client-Secret': NAVER_CLIENT_SECRET,
-          },
-          params: {
-            query: this.searchQuery,
-            display: 5, // 최대 5개 결과
-          },
+        const response = await axios.post('http://localhost:3000/map', {
+          query: this.searchQuery, // 검색어를 'query'라는 키로 서버에 전달
         });
 
         const places = response.data.items;
+
+        console.log(places);
 
         // 이전 마커 제거
         this.clearMarkers();
@@ -82,7 +83,10 @@ export default {
         // 마커 추가
         places.forEach((place) => {
           const marker = new naver.maps.Marker({
-            position: new naver.maps.LatLng(place.mapy, place.mapx),
+            position: new naver.maps.LatLng(
+              parseFloat(place.mapy) / 1e7, // 위도 (mapy)
+              parseFloat(place.mapx) / 1e7  // 경도 (mapx)
+            ),
             map: this.map,
             title: place.title.replace(/<[^>]+>/g, ''), // 태그 제거
           });
@@ -95,10 +99,19 @@ export default {
           this.markers.push(marker);
         });
 
-        // 지도 중심을 첫 번째 검색 결과로 이동
+        // 지도 중심을 첫 번째 검색 결과로 이동하고 줌 레벨 설정
         if (places.length > 0) {
           const firstPlace = places[0];
-          this.map.setCenter(new naver.maps.LatLng(firstPlace.mapy, firstPlace.mapx));
+          const latLng = new naver.maps.LatLng(
+            parseFloat(firstPlace.mapy) / 1e7, // 위도 (mapy)
+            parseFloat(firstPlace.mapx) / 1e7  // 경도 (mapx)
+          );
+          
+          // 지도 중심을 첫 번째 장소로 이동
+          this.map.setCenter(latLng);
+
+          // 줌 레벨을 설정
+          this.map.setZoom(17);
         }
       } catch (error) {
         console.error('장소 검색 실패:', error.message);
@@ -125,7 +138,7 @@ export default {
   display: flex;
   justify-content: center;  /* 수평 가운데 정렬 */
   align-items: center;      /* 수직 가운데 정렬 */
-  height: 100vh;            /* 화면 전체 높이 사용 */
+  height: 450px;            /* 화면 전체 높이 사용 */
 }
 
 #map {
