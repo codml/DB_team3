@@ -12,7 +12,7 @@ exports.loginUser = (req, res, next) => {
             const token = jwt.sign(
                 { userID: user.Id, userPwd: user.Passwd, auth: user.Auth },
                 KEY,
-                { expiresIn: '3h' }
+                //  유효기간 : 무제한
             );
 
             res.json({ message: 'success', token: token }); // 사용자 정보를 반환
