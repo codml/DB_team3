@@ -18,6 +18,9 @@ router.post('/login', loginController.loginUser);
 router.post('/write', writeController.insertItems);
 router.get('/search', searchController.searchItems);
 router.get('/read/:Ino', readController.readItem);
+router.get('/delete/:Ino', readController.deleteItem);
+router.post('/hit/:Ino', readController.hitItem);
+router.post('/report/:Ino', readController.reportItem);
 router.get('/boardpage', boardpageController.getBoardPosts);
 // Route for posting to writepost
 router.post('/wriepost', upload.single('Image'), writepostController.writePost);

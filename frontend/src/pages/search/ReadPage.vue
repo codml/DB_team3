@@ -28,28 +28,39 @@
       </p>
     </div>
 
-    <!-- 제목 -->
-    <h1 class="product-title">{{ product.Title }}</h1>
-
-    <!-- 상품 정보 -->
-    <div class="product-info">
-      <div class="info-row">
+    <!-- 상품 정보 및 판매자 정보 레이아웃 -->
+    <div class="info-layout">
+      <!-- 상품 정보 -->
+      <div class="product-info">
+        <h2>상품 정보</h2>
         <p><strong>등록일:</strong> {{ formatDate(product.Reg_date) }}</p>
         <p><strong>가격:</strong> {{ product.Price }}원</p>
-      </div>
-      <div class="info-row">
         <p><strong>카테고리:</strong> {{ product.Group1 }} > {{ product.Group2 }}</p>
         <p><strong>태그:</strong> {{ product.Group3 }}</p>
-      </div>
-      <div class="info-row">
-        <p><strong>선호 거래 방식: </strong> {{ product.Deal_way }}</p>
+        <p v-if="product.Deal_way === 0"><strong>선호 거래 방식:</strong> 직거래</p>
+        <p v-else><strong>선호 거래 방식:</strong> 택배 거래</p>
         <p v-if="product.Deal_way === 0"><strong>지역:</strong> {{ product.Place }}</p>
-      </div>
-      <div class="info-row">
-        <!-- 찜 버튼 추가 -->
         <button @click="likeProduct" class="like-button">
           ❤ {{ product.Like_cnt }}
         </button>
+      </div>
+
+      <!-- 판매자 정보 -->
+      <div class="seller-info">
+        <h2>판매자 정보</h2>
+        <p><strong>이름:</strong> {{ product.Uname }}</p>
+        <p><strong>성별:</strong> {{ product.Sex }}</p>
+        <p><strong>신고 당한 횟수:</strong> {{ product.Rp_cnt }}</p>
+        <p><strong>평점:</strong> {{ product.Avg_rating }}</p>
+
+        <!-- 게시물 신고 -->
+        <h2>게시물 신고</h2>
+        <textarea
+          v-model="reportContent"
+          placeholder="신고 내용을 작성해주세요."
+          class="report-textarea"
+        ></textarea>
+        <button @click="reportProduct" class="report-button">신고</button>
       </div>
     </div>
 
@@ -59,7 +70,7 @@
       <p>{{ product.Content }}</p>
     </section>
 
-    <!-- 삭제 버튼 추가 -->
+    <!-- 삭제 버튼 -->
     <div class="action-buttons" v-if="product.Uid === userID || auth === 1">
       <button @click="deleteProduct" class="delete-button">삭제</button>
     </div>
@@ -80,8 +91,9 @@ export default {
       product: {},
       userID: "",
       auth: "",
-      imageSources: [], // 이미지 소스 목록
-      currentImageIndex: 0, // 현재 이미지 인덱스
+      imageSources: [],
+      currentImageIndex: 0,
+      reportContent: "",
     };
   },
   methods: {
@@ -95,12 +107,11 @@ export default {
           this.auth = user.auth;
           this.product = response.data[0];
 
-          // 이미지 데이터를 초기화
           this.imageSources = [
             this.product.Image,
             this.product.Subimg1,
             this.product.Subimg2,
-          ].filter((img) => img); // null이 아닌 이미지만 추가
+          ].filter((img) => img);
         } else {
           console.error("상품 데이터를 가져오지 못했습니다.");
         }
@@ -127,21 +138,46 @@ export default {
     },
     async likeProduct() {
       try {
-        const response = await axios.post(`http://localhost:3000/read/${this.ino}`, {
-          likeCount: this.product.Like_cnt + 1,
-        });
-        if (response.data.success) {
-          this.product.Like_cnt += 1;
-        } else {
-          console.error("찜 업데이트 실패");
+        if (this.product.Uid !== this.userID) {
+          const response = await axios.post(`http://localhost:3000/hit/${this.ino}`, {
+            Uid: this.userID,
+          });
+          if (response.data.success) {
+            this.product.Like_cnt += 1;
+          } else {
+            alert("이미 좋아요를 눌렀습니다.");
+          }
         }
       } catch (error) {
         console.error("찜 업데이트 중 오류 발생:", error);
       }
     },
+    async reportProduct() {
+      try {
+        if (this.reportContent.trim() === "") {
+          alert("신고 내용을 작성해주세요.");
+          return;
+        }
+        const response = await axios.post(`http://localhost:3000/report/${this.ino}`, {
+          Uid: this.userID,
+          content: this.reportContent,
+        });
+        if (response.data.success) {
+          alert("신고가 접수되었습니다.");
+          this.product.Rp_cnt += 1;
+          this.reportContent = "";
+        } else {
+          alert("이미 신고한 게시물입니다.");
+          this.reportContent = "";
+          console.error("신고 중복");
+        }
+      } catch (error) {
+        console.error("신고 처리 중 오류 발생:", error);
+      }
+    },
     async deleteProduct() {
       try {
-        const response = await axios.post(`http://localhost:3000/read/${this.ino}`);
+        const response = await axios.get(`http://localhost:3000/delete/${this.ino}`);
         if (response.data.success) {
           alert("게시글이 삭제되었습니다.");
           this.$router.push("/search");
@@ -160,6 +196,7 @@ export default {
 </script>
 
 <style scoped>
+/* 기본 스타일 */
 .product-detail {
   max-width: 900px;
   margin: 30px auto;
@@ -178,20 +215,20 @@ export default {
 .slider-container {
   position: relative;
   max-width: 100%;
-  height: 600px; /* 원하는 높이 설정 */
+  height: 600px;
   overflow: hidden;
   border-radius: 10px;
   border: 1px solid #ccc;
-  display: flex; /* 이미지 중앙 정렬을 위해 추가 */
-  justify-content: center; /* 가로 중앙 정렬 */
-  align-items: center; /* 세로 중앙 정렬 */
-  background-color: #f9f9f9; /* 빈 공간 색상 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9f9f9;
 }
 
 .main-image {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain; /* 이미지가 짤리지 않고 전체가 보이도록 설정 */
+  object-fit: contain;
 }
 
 .arrow-button {
@@ -206,7 +243,6 @@ export default {
   height: 40px;
   font-size: 18px;
   cursor: pointer;
-  z-index: 1;
 }
 
 .arrow-button.left {
@@ -228,25 +264,50 @@ export default {
   color: #666;
 }
 
-.product-title {
-  font-size: 28px;
-  font-weight: bold;
-  margin: 20px 0;
-  text-align: center;
+/* 상품 정보 및 판매자 정보 레이아웃 */
+.info-layout {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .product-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.info-row {
+.seller-info {
+  flex: 1;
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.report-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
   font-size: 16px;
 }
 
+.report-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.report-button:hover {
+  background-color: #c0392b;
+}
+
+/* 상품 내용 */
 .product-description {
   margin-top: 30px;
   border-top: 2px solid #ccc;
@@ -255,7 +316,6 @@ export default {
 
 .product-description h2 {
   font-size: 24px;
-  font-weight: bold;
   margin-bottom: 10px;
 }
 
@@ -264,6 +324,7 @@ export default {
   line-height: 1.6;
 }
 
+/* 버튼 */
 .like-button {
   background-color: #ff6f61;
   color: white;
@@ -271,7 +332,6 @@ export default {
   border-radius: 5px;
   padding: 5px 10px;
   cursor: pointer;
-  font-size: 16px;
 }
 
 .like-button:hover {
@@ -279,18 +339,15 @@ export default {
 }
 
 .delete-button {
-  margin-top: 20px;
   background-color: #e74c3c;
   color: white;
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
   cursor: pointer;
-  font-size: 16px;
 }
 
 .delete-button:hover {
   background-color: #c0392b;
 }
 </style>
-
