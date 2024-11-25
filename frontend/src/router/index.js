@@ -72,19 +72,19 @@ const routes = [
   {
     path: '/board/writePost',
     name: 'WritePost',
-    component: () => import('../pages/board/writePost/WritePost.vue'),
+    component: () => import('../pages/board/WritePost.vue'),
     meta: { requiresAuth: true } // 인증이 필요한 페이지
   },
   {
     path: '/board/viewPost',
     name: 'ViewPost',
-    component: () => import('../pages/board/viewPost/ViewPost.vue'),
+    component: () => import('../pages/board/ViewPost.vue'),
     meta: { requiresAuth: true } // 인증이 필요한 페이지
   },
   {
     path: '/board/updatePost',
     name: 'UpdatePost',
-    component: () => import('../pages/board/updatePost/UpdatePost.vue'),
+    component: () => import('../pages/board/UpdatePost.vue'),
     meta: { requiresAuth: true } // 인증이 필요한 페이지
   },
   {

@@ -22,7 +22,7 @@ exports.writePost = (postData, callback) => {
             postData.Content,
             postData.Image, // Binary image data
             postData.Notice,
-            postData.Reg_Date,
+            postData.Reg_date,
         ],
         function (err, rows) {
             if (err) {
