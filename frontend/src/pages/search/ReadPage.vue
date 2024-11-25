@@ -74,6 +74,9 @@
     <div class="action-buttons" v-if="product.Uid === userID || auth === 1">
       <button @click="deleteProduct" class="delete-button">삭제</button>
     </div>
+    <div class="action-buttons" v-if="product.Uid === userID">
+      <button @click="updateProduct" class="update-button">수정</button>
+    </div>
   </div>
   <div v-else>
     <p>로딩 중...</p>
@@ -187,6 +190,9 @@ export default {
       } catch (error) {
         console.error("게시글 삭제 중 오류 발생:", error);
       }
+    },
+    updateProduct() {
+      this.$router.push(`/update/${this.ino}`);
     },
   },
   mounted() {
@@ -349,5 +355,18 @@ export default {
 
 .delete-button:hover {
   background-color: #c0392b;
+}
+
+.update-button {
+  background-color: #42b983;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.update-button:hover {
+  background-color: #42ff83;
 }
 </style>

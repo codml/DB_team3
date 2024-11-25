@@ -40,6 +40,13 @@ const routes = [
     props: true
   },
   {
+    path: '/update/:ino',
+    name: 'update',
+    component: () => import('../pages/search/UpdatePage.vue'),
+    meta: { requiresAuth: true }, // 인증이 필요한 페이지
+    props: true
+  },
+  {
     path: '/regist',
     name: 'regist',
     component: () => import('../pages/regist/RegistPage.vue'),
