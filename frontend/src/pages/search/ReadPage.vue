@@ -26,8 +26,8 @@
       <p class="image-info">
         이미지 {{ currentImageIndex + 1 }} / {{ imageSources.length }}
       </p>
+      <h2 class="product-title">{{ product.Title }}</h2>
     </div>
-
     <!-- 상품 정보 및 판매자 정보 레이아웃 -->
     <div class="info-layout">
       <!-- 상품 정보 -->
@@ -71,11 +71,21 @@
     </section>
 
     <!-- 삭제 버튼 -->
-    <div class="action-buttons" v-if="product.Uid === userID || auth === 1">
-      <button @click="deleteProduct" class="delete-button">삭제</button>
-    </div>
-    <div class="action-buttons" v-if="product.Uid === userID">
-      <button @click="updateProduct" class="update-button">수정</button>
+    <div class="action-buttons-container">
+      <button 
+        v-if="product.Uid === userID || auth === 1" 
+        @click="deleteProduct" 
+        class="delete-button"
+      >
+        삭제
+      </button>
+      <button 
+        v-if="product.Uid === userID" 
+        @click="updateProduct" 
+        class="update-button"
+      >
+        수정
+      </button>
     </div>
   </div>
   <div v-else>
@@ -157,6 +167,8 @@ export default {
     },
     async reportProduct() {
       try {
+        if (this.product.Uid === this.userID)
+          return;
         if (this.reportContent.trim() === "") {
           alert("신고 내용을 작성해주세요.");
           return;
@@ -270,6 +282,14 @@ export default {
   color: #666;
 }
 
+.product-title {
+  text-align: center;
+  font-size: 24px;
+  margin: 15px 0 10px; /* 이미지와 제목 간의 간격 */
+  color: #333; /* 제목 색상 */
+  font-weight: bold;
+}
+
 /* 상품 정보 및 판매자 정보 레이아웃 */
 .info-layout {
   display: flex;
@@ -293,7 +313,7 @@ export default {
 
 .report-textarea {
   width: 100%;
-  height: 100px;
+  height: 10px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -344,29 +364,40 @@ export default {
   background-color: #e65b50;
 }
 
+.action-buttons-container {
+  display: flex;
+  justify-content: space-between; /* 버튼을 양 끝에 배치 */
+  align-items: center; /* 세로 정렬 */
+  margin: 20px 0; /* 상하 간격 추가 */
+}
+
+.delete-button, .update-button {
+  padding: 10px 20px; /* 버튼 크기 조정 */
+  font-size: 18px; /* 버튼 글자 크기 */
+  border: none; /* 기본 테두리 제거 */
+  border-radius: 5px; /* 약간 둥근 모서리 */
+  cursor: pointer; /* 클릭 가능한 버튼 표시 */
+  transition: background-color 0.3s ease; /* 마우스 호버 시 색상 전환 */
+}
+
+/* 삭제 버튼 스타일 */
 .delete-button {
-  background-color: #e74c3c;
+  background-color: #f44336; /* 빨간색 배경 */
   color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  cursor: pointer;
 }
 
 .delete-button:hover {
-  background-color: #c0392b;
+  background-color: #d32f2f; /* 조금 더 어두운 빨간색 */
 }
 
+/* 수정 버튼 스타일 */
 .update-button {
-  background-color: #42b983;
+  background-color: #4caf50; /* 초록색 배경 */
   color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  cursor: pointer;
 }
 
 .update-button:hover {
-  background-color: #42ff83;
+  background-color: #388e3c; /* 조금 더 어두운 초록색 */
 }
+
 </style>

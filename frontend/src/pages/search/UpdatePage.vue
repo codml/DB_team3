@@ -123,7 +123,7 @@ export default {
     return {
       title: "",
       existPhotos: [],
-      photoSelection: [],
+      photoSelection: [false, false, false],
       photos: [null, null, null],
       previews: [null, null, null],
       price: "",
@@ -134,6 +134,22 @@ export default {
       mainCategory: "",
       subCategory: "",
     };
+  },
+  computed: {
+    isFormValid() {
+      const isLocationValid = this.Deal_way === 0 ? !!this.location : true;
+
+      return (
+        !!this.title &&
+        !!this.price &&
+        !!this.description &&
+        this.Deal_way !== null &&
+        isLocationValid &&
+        !!this.tags &&
+        !!this.mainCategory &&
+        !!this.subCategory
+      );
+    },
   },
   methods: {
     async loadFormData() {
@@ -151,7 +167,10 @@ export default {
           this.subCategory = res.Group2;
 
           this.existPhotos = [res.Image, res.Subimg1, res.Subimg2];
-          this.photoSelection = Array(this.existPhotos.length).fill(true);
+          this.photoSelection.forEach((_, index) => {
+            if (this.existPhotos[index])
+              this.photoSelection[index] = true;
+          });
         }
       } catch (error) {
         console.error("상품 정보를 가져오는 중 오류 발생:", error);
@@ -195,6 +214,10 @@ export default {
     },
 
     async submitForm() {
+      if (!this.isFormValid) {
+        alert("모든 필드를 입력해주세요.");
+        return;
+      }
       const formData = new FormData();
       
       // 기본 필드들 추가
@@ -208,23 +231,29 @@ export default {
       formData.append("Group3", this.tags);
 
       // 기존 이미지 처리
-      this.existPhotos.forEach((photo, index) => {
-        if (this.photoSelection[index]) {
-          formData.append(`ExistingImage${index + 1}`, photo);
-        }
+      this.photoSelection.forEach((tf, index) => {
+        if (index === 0) formData.append('isImage', tf);
+        else if (index === 1) formData.append('isSubimg1', tf);
+        else if (index === 2) formData.append('isSubimg2', tf);
       });
 
       // 새 이미지 처리
       this.photos.forEach((file, index) => {
-        if (file) {
-          formData.append(`NewImage${index + 1}`, file);
-        }
+        if (index === 0) formData.append('Image', file);
+        else if (index === 1) formData.append('Subimg1', file);
+        else if (index === 2) formData.append('Subimg2', file);
       });
 
+      if (this.photoSelection[0] === false && this.photos[0] == null)
+      {
+        alert("대표 이미지는 반드시 있어야 합니다.");
+        return;
+      }
+
       try {
-        await axios.patch(`http://localhost:3000/update/${this.ino}`, formData);
+        await axios.put(`http://localhost:3000/update/${this.ino}`, formData);
         alert("수정 성공!");
-        this.$emit("updateComplete");
+        this.$router.push(`/read/${this.ino}`);
       } catch (error) {
         alert("수정 실패. 다시 시도해주세요.");
         console.error(error);
