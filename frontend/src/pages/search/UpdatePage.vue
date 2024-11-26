@@ -4,32 +4,66 @@
       <label for="title">제목</label>
       <input type="text" id="title" placeholder="제목을 입력하세요" v-model="title" />
     </div>
-
     <div class="form-group row">
       <label for="photos">사진</label>
       <div class="photo-upload">
-        <!-- 기존 사진 표시 -->
-        <div class="photo-previews">
-          <div v-for="(photo, index) in existPhotos" :key="'existing-' + index" class="photo-item">
-            <img :src="`data:image/jpeg;base64,${photo}`" alt="기존 이미지 미리보기" class="preview-image" />
-            <label>
-              <input type="checkbox" v-model="photoSelection[index]" /> 유지
-            </label>
+        <div 
+          v-for="(_, index) in 3" 
+          :key="index"
+          class="photo-section"
+        >
+          <h4 v-if="index === 0">대표 이미지</h4>
+          <h4 v-else>서브 이미지 {{ index }}</h4>
+          <!-- 기존 이미지 표시 -->
+          <div class="photo-preview" v-if="existPhotos[index]">
+            <div class="photo-item">
+              <img 
+                :src="`data:image/jpeg;base64,${existPhotos[index]}`" 
+                :alt="`이미지 ${index + 1} 미리보기`" 
+                class="preview-image" 
+              />
+              <label>
+                <input 
+                  type="checkbox" 
+                  v-model="photoSelection[index]" 
+                /> 유지
+              </label>
+            </div>
           </div>
-        </div>
-
-        <!-- 새로 추가된 사진 -->
-        <input type="file" id="photos" accept="image/*" multiple @change="handleFileUpload" ref="fileInput" style="display: none;" />
-        <button type="button" @click="triggerFileInput">파일 선택</button>
-        <div class="photo-previews">
-          <div v-for="(preview, index) in previews" :key="'new-' + index" class="photo-item">
-            <img :src="preview" alt="미리보기 이미지" class="preview-image" />
-            <button type="button" @click="handleFileDelete(index)">삭제</button>
+          <!-- 새 이미지 업로드 -->
+          <input 
+            type="file" 
+            accept="image/*" 
+            @change="(e) => handleFileUpload(e, index)" 
+            ref="photoInput" 
+            :disabled="photoSelection[index]" 
+            style="display: none;" 
+          />
+          <button 
+            type="button" 
+            @click="() => triggerFileInput(index)" 
+            :disabled="photoSelection[index]"
+          >
+            이미지 선택
+          </button>
+          <div class="photo-preview" v-if="previews[index]">
+            <div class="photo-item">
+              <img 
+                :src="previews[index]" 
+                :alt="`새 이미지 ${index + 1} 미리보기`" 
+                class="preview-image" 
+              />
+              <button 
+                type="button" 
+                @click="() => handleFileDelete(index)"
+              >
+                삭제
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
     <div class="form-group row">
       <label for="price">가격</label>
       <input type="text" id="price" placeholder="가격을 입력하세요" v-model="price" />
@@ -90,8 +124,8 @@ export default {
       title: "",
       existPhotos: [],
       photoSelection: [],
-      photos: [],
-      previews: [],
+      photos: [null, null, null],
+      previews: [null, null, null],
       price: "",
       description: "",
       Deal_way: 1,
@@ -99,7 +133,6 @@ export default {
       tags: "",
       mainCategory: "",
       subCategory: "",
-      maxPhotos: 3,
     };
   },
   methods: {
@@ -117,50 +150,54 @@ export default {
           this.mainCategory = res.Group1;
           this.subCategory = res.Group2;
 
-          this.existPhotos = [res.Image, res.Subimg1, res.Subimg2]
+          this.existPhotos = [res.Image, res.Subimg1, res.Subimg2];
           this.photoSelection = Array(this.existPhotos.length).fill(true);
-        } else {
-          console.error("상품 데이터를 가져오지 못했습니다.");
         }
       } catch (error) {
         console.error("상품 정보를 가져오는 중 오류 발생:", error);
       }
     },
-    handleFileUpload(event) {
-      const files = Array.from(event.target.files);
-      const validFiles = files.filter((file) => file.type.startsWith("image/"));
 
-      // 기존 선택된 사진 수 확인
-      const totalPhotos = this.photos.length + this.photoSelection.filter(Boolean).length;
-      const availableSlots = this.maxPhotos - totalPhotos;
+    handleFileUpload(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-      if (validFiles.length > availableSlots) {
-        alert(`사진은 최대 ${this.maxPhotos}개까지 업로드 가능합니다.`);
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 업로드 가능합니다.");
         return;
       }
 
-      // 새로 추가된 사진의 미리보기 URL 생성
-      validFiles.slice(0, availableSlots).forEach((file) => {
-        const preview = URL.createObjectURL(file);
-        this.photos.push(file); // 실제 파일 저장
-        this.previews.push(preview); // 미리보기 URL 저장
-      });
+      if (this.previews[index]) {
+        URL.revokeObjectURL(this.previews[index]);
+      }
 
-      // 디버그 출력
-      console.log("Photos:", this.photos);
-      console.log("Previews:", this.previews);
+      const preview = URL.createObjectURL(file);
+      this.photos[index] = file;
+      this.previews[index] = preview;
     },
-    triggerFileInput() {
-      this.$refs.fileInput.click();
+
+    triggerFileInput(index) {
+      // this.$refs.photoInput은 배열로 저장됨
+      const inputElement = this.$refs.photoInput[index];
+      if (inputElement) {
+        inputElement.click();
+      } else {
+        console.error(`파일 입력 요소를 찾을 수 없습니다. (index: ${index})`);
+      }
     },
+
     handleFileDelete(index) {
-      URL.revokeObjectURL(this.previews[index]);
-      this.photos.splice(index, 1);
-      this.previews.splice(index, 1);
+      if (this.previews[index]) {
+        URL.revokeObjectURL(this.previews[index]);
+      }
+      this.photos[index] = null;
+      this.previews[index] = null;
     },
-    async submitForm() {
 
+    async submitForm() {
       const formData = new FormData();
+      
+      // 기본 필드들 추가
       formData.append("Title", this.title);
       formData.append("Price", this.price);
       formData.append("Content", this.description);
@@ -170,15 +207,20 @@ export default {
       formData.append("Group2", this.subCategory);
       formData.append("Group3", this.tags);
 
+      // 기존 이미지 처리
       this.existPhotos.forEach((photo, index) => {
         if (this.photoSelection[index]) {
           formData.append(`ExistingImage${index + 1}`, photo);
         }
       });
 
+      // 새 이미지 처리
       this.photos.forEach((file, index) => {
-        formData.append(`NewImage${index + 1}`, file);
+        if (file) {
+          formData.append(`NewImage${index + 1}`, file);
+        }
       });
+
       try {
         await axios.patch(`http://localhost:3000/update/${this.ino}`, formData);
         alert("수정 성공!");
@@ -232,65 +274,38 @@ export default {
 label {
   font-weight: bold;
   color: #333; /* 텍스트 색상 다크 그레이 */
-  font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
 input[type='text'],
 textarea {
   flex: 1;
-  padding: 10px; /* 인풋 필드 패딩 늘림 */
-  border: 1px solid #bbb; /* 테두리 약간 밝게 */
+  padding: 10px;
+  border: 1px solid #bbb;
   border-radius: 4px;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
   margin-left: 20px;
-}
-
-/* 사진 업로드 */
-.photo-upload {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-/* 위치와 태그 입력 */
-.location-select,
-.tags-select {
-  display: flex;
-  align-items: center;
-  width: 300px;
-  gap: 15px;
 }
 
 /* 버튼 스타일 */
 button {
-  padding: 10px 14px; /* 버튼 크기 약간 늘림 */
+  padding: 10px 14px;
   border: none;
   background-color: #007bff; /* 파란 버튼 */
   color: white;
-  border-radius: 5px; /* 둥근 테두리 */
+  border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
 button:hover {
-  background-color: #0056b3; /* hover 효과 */
+  background-color: #0056b3;
 }
 
 button.delete {
   background-color: #dc3545;
 }
 
-button.modify {
-  background-color: #28a745;
-}
-
 button.delete:hover {
   background-color: #c82333;
-}
-
-button.modify:hover {
-  background-color: #218838;
 }
 
 /* 폼 액션 */
@@ -299,77 +314,48 @@ button.modify:hover {
   justify-content: flex-end;
 }
 
-/* 폼 그룹 버튼과 텍스트 */
-.form-group button,
-.form-group p {
-  text-align: center;
-  margin: 0 auto;
-  display: block;
-  font-weight: bold;
-}
-
-.form-group p {
-  color: #444; /* 다크 그레이 */
-}
-
-/* 거래 방식 선택 */
-.trade-options {
+/* 사진 업로드 */
+.photo-upload {
   display: flex;
-  gap: 15px;
+  flex-wrap: wrap; /* 여러 줄 허용 */
+  gap: 15px; /* 사진 간 간격 */
+  justify-content: space-between; /* 균등하게 배치 */
 }
 
-button.router-link-exact-active {
-  color: #42b983;
+.photo-section {
+  width: calc(33.333% - 10px); /* 3개의 이미지를 균등 배치 */
+  box-sizing: border-box; /* 패딩과 테두리 포함 */
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: white;
+  text-align: center; /* 텍스트 및 버튼 중앙 정렬 */
 }
 
-/* 이미지 미리보기 */
-.photo-previews {
-  margin-top: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px; /* 간격을 넓게 */
+.photo-section h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.photo-preview {
+  margin-top: 10px;
 }
 
 .photo-item {
   position: relative;
-  display: inline-block;
 }
 
 .preview-image {
-  width: 100px;
+  width: 100%;
   height: 100px;
   object-fit: cover;
-  border-radius: 5px; /* 둥근 모서리 */
+  border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-.photo-item button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  padding: 3px 8px; /* 크기 조정 */
-  border: none;
-  background-color: #dc3545;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-/* 카테고리 선택 */
-.category-select {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
 /* 스타일링 추가 */
-.form-container.update-mode {
-  background-color: #fdfdfd; /* 업데이트 페이지에서는 약간 더 밝은 배경색 */
-}
-
 button.register {
-  background-color: #ffc107; /* 업데이트 버튼은 노란색 */
+  background-color: #ffc107;
 }
 
 button.register:hover {
