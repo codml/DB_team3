@@ -45,105 +45,107 @@ export default {
     },
 
     drawChart() {
-      if (!window.google) {
-        console.error("Google Chart 라이브러리가 로드되지 않았습니다.");
-        return;
-      }
+  if (!window.google) {
+    console.error("Google Chart 라이브러리가 로드되지 않았습니다.");
+    return;
+  }
 
-      const data = new window.google.visualization.DataTable();
-      data.addColumn('string', '날짜');
-      data.addColumn('number', '평균 시세');
+  const data = new window.google.visualization.DataTable();
+  data.addColumn('string', '날짜');
+  data.addColumn('number', '평균 시세');
 
-      this.chartData.forEach(item => {
-        const label = `${item.year}-${String(item.month).padStart(2, '0')}`;
-        data.addRow([label, item.avg_price]);
-      });
+  this.chartData.forEach(item => {
+    const label = `${item.year}-${String(item.month).padStart(2, '0')}`;
+    data.addRow([label, item.avg_price]);
+  });
 
-      const options = {
-        title: `${this.group3} 평균시세`,
-        titleTextStyle: {
-          color: '#2c3e50',
-          fontSize: 24,
-          bold: true
-        },
-        curveType: 'function',
-        lineWidth: 3,
-        colors: ['#42b983'],
-        backgroundColor: {
-          fill: '#f8f9fa',
-          stroke: '#ddd',
-          strokeWidth: 1
-        },
-        chartArea: {
-          left: 100,    // y축 영역 확보를 위해 왼쪽 여백 증가
-          right: 50,    // 오른쪽 여백
-          top: 50,      // 위쪽 여백
-          bottom: 50,   // 아래쪽 여백
-          width: '80%', // 차트 영역 너비 조정
-          height: '75%',
-          backgroundColor: {
-            fill: 'white',
-            opacity: 100
-          }
-        },
-        hAxis: {
-          title: '연월',
-          titleTextStyle: {
-            color: '#2c3e50',
-            italic: false,
-            bold: true
-          },
-          gridlines: {
-            color: '#f5f5f5'
-          },
-          baselineColor: '#ddd',
-          textStyle: {
-            fontSize: 11  // x축 글자 크기 조정
-          }
-        },
-        vAxis: {
-          title: '평균 시세',
-          titleTextStyle: {
-            color: '#2c3e50',
-            italic: false,
-            bold: true
-          },
-          gridlines: {
-            color: '#f5f5f5'
-          },
-          baselineColor: '#ddd',
-          format: '₩#,###',
-          textPosition: 'out',  // 텍스트를 축 바깥쪽에 위치
-          textStyle: {
-            fontSize: 11  // y축 글자 크기 조정
-          },
-          viewWindow: {
-            min: 0  // y축 최소값을 0으로 설정
-          }
-        },
-        legend: { position: 'none' },
-        animation: {
-          startup: true,
-          duration: 1000,
-          easing: 'out'
-        },
-        tooltip: {
-          textStyle: {
-            color: '#2c3e50',
-            fontSize: 14
-          },
-          showColorCode: true,
-          format: 'currency'  // 툴팁의 숫자를 통화 형식으로 표시
-        },
-        crosshair: {
-          color: '#42b983',
-          trigger: 'both'
-        }
-      };
-
-      const chart = new window.google.visualization.LineChart(document.getElementById('chart_div'));
-      chart.draw(data, options);
+  const options = {
+    title: `${this.group3} 평균시세`,
+    titleTextStyle: {
+      color: '#2c3e50',
+      fontSize: 24,
+      bold: true,
     },
+    curveType: 'function',
+    lineWidth: 3,
+    colors: ['#42b983'],
+    pointSize: 5, // 데이터 지점의 크기 설정
+    backgroundColor: {
+      fill: '#f8f9fa',
+      stroke: '#ddd',
+      strokeWidth: 1,
+    },
+    chartArea: {
+      left: 100,
+      right: 50,
+      top: 50,
+      bottom: 50,
+      width: '80%',
+      height: '75%',
+    },
+    hAxis: {
+      title: '연월',
+      titleTextStyle: {
+        color: '#2c3e50',
+        italic: false,
+        bold: true,
+      },
+      gridlines: {
+        color: '#f5f5f5',
+      },
+      baselineColor: '#ddd',
+      textStyle: {
+        fontSize: 11,
+      },
+    },
+    vAxis: {
+      title: '평균 시세',
+      titleTextStyle: {
+        color: '#2c3e50',
+        italic: false,
+        bold: true,
+      },
+      gridlines: {
+        color: '#f5f5f5',
+      },
+      baselineColor: '#ddd',
+      format: '₩#,###',
+      textPosition: 'out',
+      textStyle: {
+        fontSize: 11,
+      },
+      viewWindow: {
+        min: 0,
+      },
+    },
+    legend: { position: 'none' },
+    animation: {
+      startup: true,
+      duration: 1000,
+      easing: 'out',
+    },
+    tooltip: {
+      textStyle: {
+        color: '#2c3e50',
+        fontSize: 14,
+      },
+      showColorCode: true,
+      format: 'currency',
+    },
+    crosshair: {
+      color: '#42b983',
+      trigger: 'both',
+    },
+    series: {
+      0: {
+        pointSize: 5, // 점의 크기 설정
+      },
+    },
+  };
+
+  const chart = new window.google.visualization.LineChart(document.getElementById('chart_div'));
+  chart.draw(data, options);
+},
   },
   mounted() {
     const script = document.createElement('script');
