@@ -3,58 +3,68 @@
     <main>
       <!-- 검색 및 정렬 필터 -->
       <section class="center-search">
-        <div class="category-row">
-          <div class="input-group">
-            <label for="main-category">대분류:</label>
-            <input
-              type="text"
-              id="main-category"
-              v-model="mainCategory"
-              placeholder="대분류 입력"
-            />
+        <h1 class="search-title">검색 필터</h1>
+        <div class="filter-container">
+          <div class="row">
+            <div class="input-group">
+              <label for="main-category">대분류:</label>
+              <input
+                type="text"
+                id="main-category"
+                v-model="mainCategory"
+                placeholder="대분류 입력"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sub-category">소분류:</label>
+              <input
+                type="text"
+                id="sub-category"
+                v-model="subCategory"
+                placeholder="소분류 입력"
+              />
+            </div>
           </div>
-          <div class="input-group">
-            <label for="sub-category">소분류:</label>
-            <input
-              type="text"
-              id="sub-category"
-              v-model="subCategory"
-              placeholder="소분류 입력"
-            />
+
+          <div class="row">
+            <div class="input-group keyword-group">
+              <label for="search-query">제목 키워드:</label>
+              <div class="search-bar">
+                <input
+                  type="text"
+                  id="search-query"
+                  v-model="searchQuery"
+                  placeholder="검색할 상품 제목 입력"
+                />
+              </div>
+            </div>
+            <div class="input-group price-group">
+              <label for="price-range">가격:</label>
+              <div class="price-inputs">
+                <input
+                  type="number"
+                  v-model.number="priceFrom"
+                  placeholder="최소 가격"
+                />
+                ~
+                <input
+                  type="number"
+                  v-model.number="priceTo"
+                  placeholder="최대 가격"
+                />
+              </div>
+            </div>
           </div>
-          <div class="input-group">
-            <label for="price-range">가격:</label>
-            <input
-              type="number"
-              v-model.number="priceFrom"
-              placeholder="최소 가격 입력"
-            />
-            ~
-            <input
-              type="number"
-              v-model.number="priceTo"
-              placeholder="최대 가격 입력"
-            />
-          </div>
-          <button @click="fetchPosts">검색</button>
         </div>
 
-        <div class="keyword-search">
-          <label for="search-query">제목 키워드:</label>
-          <div class="search-bar">
-            <input
-              type="text"
-              id="search-query"
-              v-model="searchQuery"
-              placeholder="검색할 상품 제목 입력"
-            />
-            <button @click="fetchPosts">검색</button>
-          </div>
+        <!-- 검색 버튼 -->
+        <div class="center-button">
+          <button class="search-button" @click="fetchPosts">검색</button>
         </div>
 
         <div class="filter-buttons">
           <button @click="setSortOption('찜 많은 순')">찜 많은 순</button>
-          <button @click="setSortOption('좋아요 많은 순')">좋아요 많은 순</button>
+          <button @click="setSortOption('가격 순')">가격 순</button>
           <button @click="setSortOption('최신 순')">최신 순</button>
         </div>
       </section>
@@ -66,16 +76,22 @@
             v-for="(product, index) in posts"
             :key="index"
             class="product-card"
+            @click="redirectToRead(product.Ino)"
           >
             <div class="product-image">
-              <img :src="product.Image" alt="상품 이미지" />
+              <img
+                v-if="product.Image"
+                :src="`data:image/jpeg;base64,${product.Image}`"
+                alt="상품 이미지"
+              />
+              <div v-else class="no-image">이미지 없음</div>
             </div>
             <div class="product-info">
               <h3>{{ product.Title }}</h3>
               <p>가격: {{ product.Price }}원</p>
               <p>찜: ❤ {{ product.Like_cnt }}</p>
               <p>
-                [지역: {{ product.Place }} | 게시일: {{ product.Reg_date }} |
+                [지역: {{ product.Place }} | 게시일: {{ formatDate(product.Reg_date) }} |
                 분류: {{ product.Group1 }}]
               </p>
             </div>
@@ -147,7 +163,10 @@ export default {
         console.log("Axios 응답 데이터:", response.data);
 
         if (Array.isArray(response.data)) {
-          this.allPosts = response.data;
+          this.allPosts = response.data.map(post => ({
+            ...post,
+            Reg_date: post.Reg_date, // 날짜 형식 변환이 필요할 경우 추가
+          }));
         } else {
           console.error("응답 데이터가 배열이 아닙니다.");
           this.allPosts = [];
@@ -169,6 +188,15 @@ export default {
       if (page > 0 && page <= this.totalPages) {
         this.currentPage = page;
       }
+    },
+
+    redirectToRead(ino) {
+      this.$router.push(`/read/${ino}`);
+    },
+
+    formatDate(dateString) {
+      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      return new Date(dateString).toLocaleDateString("ko-KR", options);
     },
   },
   mounted() {
@@ -195,76 +223,115 @@ main {
 }
 
 .center-search {
-  margin-top: 20px;
+  width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
 }
 
-.category-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
+.search-title {
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
   margin-bottom: 20px;
 }
 
-.input-group {
+.filter-container {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 30px; /* 섹션 간 간격 */
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* 위쪽 정렬 */
+  width: 100%;
+  gap: 50px; /* 대분류와 소분류 사이 간격 */
+}
+
+.input-group {
+  flex: 1; /* 균등한 공간 배분 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input-group label {
+  font-weight: bold;
+  text-align: center;
 }
 
 .input-group input {
-  padding: 10px;
-  width: 200px;
-  margin-top: 5px;
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
 }
 
-.input-group button {
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #f8f8f8;
-  cursor: pointer;
-  border-radius: 5px;
+.keyword-group {
+  flex: 2;
 }
 
-.keyword-search {
+.price-group {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: 20px 0;
-}
-
-.keyword-search label {
-  margin-bottom: 10px;
-}
-
-.search-bar {
-  display: flex;
   gap: 10px;
 }
 
-.search-bar input {
-  padding: 15px;
-  width: 400px;
+.price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.search-bar button {
-  padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #f8f8f8;
+.price-inputs input {
+  width: calc(50% - 10px); /* 입력창 50% 크기 조정 */
+  padding: 8px;
+  font-size: 14px;
+}
+
+.center-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.search-button {
+  width: 500px; /* 버튼 너비를 가로로 길게 설정 */
+  height: 30%; /* 버튼 높이를 얇게 설정 */
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #d3d3d3; /* 기본 회색 */
+  color: #000; /* 기본 검은색 텍스트 */
+  border: 2px solid #000; /* 검정색 테두리 */
+  border-radius: 0; /* 모서리를 둥글게 하지 않음 */
   cursor: pointer;
-  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.search-button:hover {
+  background-color: #42b983; /* 민트색 */
+  color: #fff; /* 호버 시 흰색 텍스트 */
 }
 
 .filter-buttons {
+  align-self: flex-end;
   display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-top: 20px;
 }
 
 .filter-buttons button {
   padding: 10px 20px;
+  font-size: 14px;
   border: 1px solid #ccc;
   background-color: #f8f8f8;
   cursor: pointer;
@@ -272,9 +339,26 @@ main {
 }
 
 .filter-buttons button:hover {
-  background-color: #007bff;
+  background-color: #42b983;
   color: #fff;
-  border-color: #007bff;
+  border-color: #42b983;
+  transition: 0.5s;
+}
+
+@media (max-width: 768px) {
+  .center-search {
+    width: 90%;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .price-inputs {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 
@@ -298,6 +382,13 @@ main {
   background-color: #fff;
   width: 100%; /* 그리드 셀 너비에 맞춤 */
   min-width: 0; /* 그리드 아이템 오버플로우 방지 */
+  transition: border-color 0.3s ease; /* 부드러운 애니메이션 효과 */
+}
+
+.product-card:hover {
+  background-color: #42b983;
+  border-color: #42b983; /* 마우스를 올렸을 때 테두리 색 변경 */
+  transition: 0.5s;
 }
 
 .product-image {

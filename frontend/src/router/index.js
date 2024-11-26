@@ -33,6 +33,20 @@ const routes = [
     meta: { requiresAuth: true } // 인증이 필요한 페이지
   },
   {
+    path: '/read/:ino',
+    name: 'read',
+    component: () => import('../pages/search/ReadPage.vue'),
+    meta: { requiresAuth: true }, // 인증이 필요한 페이지
+    props: true
+  },
+  {
+    path: '/update/:ino',
+    name: 'update',
+    component: () => import('../pages/search/UpdatePage.vue'),
+    meta: { requiresAuth: true }, // 인증이 필요한 페이지
+    props: true
+  },
+  {
     path: '/regist',
     name: 'regist',
     component: () => import('../pages/regist/RegistPage.vue'),

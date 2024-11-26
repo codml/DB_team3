@@ -42,7 +42,9 @@ exports.searchItems = (req, callback) => {
     if (req.sortOption) {
         if (req.sortOption === "최신 순") {
             query += ` ORDER BY Reg_date DESC`;
-        } else if (req.sortOption === "좋아요 많은 순" || req.sortOption === "찜 많은 순") {
+        } else if (req.sortOption === "가격 순") {
+            query += ` ORDER BY Price`;
+        } else if (req.sortOption === "찜 많은 순") {
             query += ` ORDER BY Like_cnt DESC`;
         }
     }
@@ -53,7 +55,7 @@ exports.searchItems = (req, callback) => {
             console.error("게시물 검색 중 오류 발생:", err);
             callback(err, null);
         } else {
-            console.log("검색 결과:", JSON.stringify(rows));
+            // console.log("검색 결과:", JSON.stringify(rows));
             callback(null, rows);
         }
     });
