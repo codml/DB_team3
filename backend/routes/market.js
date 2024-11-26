@@ -16,7 +16,8 @@ var boardpageController = require('../controllers/boardpageController');
 var writepostController = require('../controllers/writepostController');
 var viewpostController = require("../controllers/viewpostController");
 var updatepostController = require("../controllers/updatepostController");
-const deletepostController = require("../controllers/deletepostController");
+var deletepostController = require("../controllers/deletepostController");
+var pricecheckController = require("../controllers/pricecheckController");
 
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
@@ -33,5 +34,6 @@ router.post('/writepost', upload.single('Image'), writepostController.writePost)
 router.get("/viewpost/", viewpostController.getPost);
 router.put('/updatepost', upload.single('Image'), updatepostController.updatePost);
 router.delete('/deletepost', deletepostController.deletePost);
+router.get('/price', pricecheckController.priceCheck);
 
 module.exports = router;
