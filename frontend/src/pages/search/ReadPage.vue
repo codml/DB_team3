@@ -64,8 +64,77 @@
         ></textarea>
         <button @click="reportProduct" class="report-button">신고</button>
         
-        <!-- 구매 요청 버튼 추가 -->
-        <button @click="requestProduct" class="request-button">구매 요청</button>
+        <!-- 구매 요청 버튼 또는 후기 글 -->
+        <div class="review-section">
+          <!-- 구매 요청 버튼 -->
+          <button
+            v-if="product.B_uid === null"
+            @click="requestProduct"
+            class="request-button"
+          >
+            구매 요청
+          </button>
+
+          <!-- 후기 글 섹션 -->
+          <div v-else>
+            <!-- 현재 사용자가 구매자일 때 -->
+            <div v-if="product.B_uid === userID">
+              <h3>후기 글</h3>
+              <textarea
+                v-if="!product.ReviewContent"
+                v-model="ReviewContent"
+                placeholder="후기 내용을 작성해주세요."
+                class="review-textarea"
+              ></textarea>
+              <!-- 별점 입력 -->
+              <div v-if="!product.ReviewContent" class="rating-input">
+                <span 
+                  v-for="star in 5" 
+                  :key="star" 
+                  class="star" 
+                  :class="{ active: star <= Ratings }"
+                  @click="setRating(star)"
+                >
+                  ★
+                </span>
+              </div>
+              <div v-else>
+                <p><strong>내용:</strong> {{ product.ReviewContent }}</p>
+                <div class="ratings-display">
+                  <p><strong>별점:</strong></p>
+                  <!-- 별점 출력 -->
+                  <span
+                    v-for="star in product.Ratings"
+                    :key="'display-' + star"
+                    class="star_static"
+                  >
+                    ★
+                  </span>
+                </div>
+                <p><strong>등록일:</strong> {{ formatDate(product.ReviewReg_date) }}</p>
+              </div>
+              <button
+                v-if="!product.ReviewContent"
+                @click="submitReview"
+                class="review-submit-button"
+              >
+                후기 저장
+              </button>
+            </div>
+            <!-- 현재 사용자가 구매자가 아닐 때 -->
+            <div v-else>
+              <div v-if="!product.ReviewContent">
+                <h4 align="center">판매 완료.</h4>
+                <h4 align="center">리뷰가 아직 등록되지 않았습니다.</h4>
+              </div>
+              <div v-else>
+                <p><strong>내용:</strong> {{ product.ReviewContent }}</p>
+                <p><strong>별점:</strong> {{ product.Ratings }} / 5</p>
+                <p><strong>등록일:</strong> {{ formatDate(product.ReviewReg_Date) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -109,9 +178,12 @@ export default {
       product: {},
       userID: "",
       auth: "",
+      reportContent: "",
       imageSources: [],
       currentImageIndex: 0,
-      reportContent: "",
+      ReviewContent: "", // 후기 내용
+      Ratings: 0, // 별점 (1~5 정수 값)
+      ReviewReg_date: ""
     };
   },
   methods: {
@@ -151,7 +223,8 @@ export default {
       }
     },
     formatDate(dateString) {
-      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      const options = { year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit"};
       return new Date(dateString).toLocaleDateString("ko-KR", options);
     },
     async likeProduct() {
@@ -215,6 +288,31 @@ export default {
     },
     updateProduct() {
       this.$router.push(`/update/${this.ino}`);
+    },
+    setRating(rating) {
+      this.Ratings = rating; // 선택한 별점 설정
+    },
+    async submitReview() {
+      if (this.Ratings === 0 || !this.ReviewContent) {
+        alert("내용 및 별점을 입력해주세요!");
+        return;
+      }
+      try {
+        const response = await axios.post(`http://localhost:3000/review/${this.ino}`, {
+          S_uid: this.product.Uid,
+          B_uid: this.userID,
+          Content: this.ReviewContent,
+          Ratings: this.Ratings, // 별점도 서버로 전송
+        });
+        if (response.data.success) {
+          alert("후기가 저장되었습니다.");
+          window.location.reload();
+        } else {
+          alert("후기 저장에 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("후기 저장 중 오류 발생:", error);
+      }
     },
   },
   mounted() {
@@ -389,5 +487,75 @@ export default {
 
 .request-button:hover {
   background-color: #2980b9; /* 호버 시 더 진한 파란색 */
+}
+
+/* 후기 글 섹션 스타일 */
+.review-section {
+  margin-top: 20px;
+}
+
+.review-content h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.review-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.review-submit-button {
+  margin-top: 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.review-submit-button:hover {
+  background-color: #2980b9;
+}
+
+.rating-input {
+  margin: 10px 0;
+}
+
+.star {
+  font-size: 24px;
+  color: #ccc; /* 기본 별 색상 */
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star_static {
+  font-size: 24px;
+  color: #f1c40f; /* 기본 별 색상 */
+}
+
+.star.active {
+  color: #f1c40f; /* 선택된 별 색상 (노란색) */
+}
+
+.star:hover {
+  color: #f39c12; /* 호버 시 색상 */
+}
+
+.ratings-display {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ratings-display p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
 }
 </style>
