@@ -9,9 +9,15 @@ var signupController = require('../controllers/signupController');
 var loginController = require('../controllers/loginController');
 var mypageController = require('../controllers/mypageController');
 var searchController = require('../controllers/searchController');
+var readController = require('../controllers/readController');
+var updateController = require('../controllers/updateController');
+var writeController = require('../controllers/writeController');
 var boardpageController = require('../controllers/boardpageController');
 var writepostController = require('../controllers/writepostController');
-var writeController = require('../controllers/writeController');
+var viewpostController = require("../controllers/viewpostController");
+var updatepostController = require("../controllers/updatepostController");
+var deletepostController = require("../controllers/deletepostController");
+var pricecheckController = require("../controllers/pricecheckController");
 
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
@@ -19,8 +25,16 @@ router.get('/mypage', mypageController.getUserInformation);
 router.post('/mypage', upload.single("Profile_image"), mypageController.modifyUserInformation);
 router.post('/write', writeController.insertItems);
 router.get('/search', searchController.searchItems);
+router.get('/read/:Ino', readController.readItem);
+router.get('/delete/:Ino', readController.deleteItem);
+router.put('/update/:Ino', updateController.updateItem);
+router.post('/hit/:Ino', readController.hitItem);
+router.post('/report/:Ino', readController.reportItem);
 router.get('/boardpage', boardpageController.getBoardPosts);
-// Route for posting to writepost
-router.post('/wriepost', upload.single('Image'), writepostController.writePost);
+router.post('/writepost', upload.single('Image'), writepostController.writePost);
+router.get("/viewpost/", viewpostController.getPost);
+router.put('/updatepost', upload.single('Image'), updatepostController.updatePost);
+router.delete('/deletepost', deletepostController.deletePost);
+router.get('/price', pricecheckController.priceCheck);
 
 module.exports = router;

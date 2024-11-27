@@ -9,14 +9,35 @@ var connection = mysql.createConnection({
 });
 
 exports.fetchAllPosts = (callback) => {
-    const query = `SELECT * FROM board ORDER BY Notice DESC, Reg_date DESC;`;
+    const noticeQuery = `
+        SELECT Uid, Title, Content, Image, Notice,
+        DATE_FORMAT(Reg_date, '%Y-%m-%d %H:%i:%s') AS Reg_date
+        FROM board WHERE Notice = 1 ORDER BY Reg_date DESC;
+    `;
+    const generalPostQuery = `
+        SELECT Uid, Title, Content, Image, Notice,
+        DATE_FORMAT(Reg_date, '%Y-%m-%d %H:%i:%s') AS Reg_date
+        FROM board WHERE Notice = 0 ORDER BY Reg_date DESC;
+    `;
 
-    connection.query(query, (err, rows) => {
-        if (err) {
-            console.error('SQL Error:', err);
-            callback({ success: false, message: 'DB Fetch Error', error: err });
+    // Execute both queries in parallel
+    connection.query(noticeQuery, (noticeErr, noticeRows) => {
+        if (noticeErr) {
+            console.error('Notice SQL Error:', noticeErr);
+            callback({ success: false, message: 'DB Fetch Error', error: noticeErr });
             return;
         }
-        callback({ success: true, data: rows });
+
+        connection.query(generalPostQuery, (postErr, postRows) => {
+            if (postErr) {
+                console.error('Post SQL Error:', postErr);
+                callback({ success: false, message: 'DB Fetch Error', error: postErr });
+                return;
+            }
+
+            // Combine and return results
+            const combinedRows = [...noticeRows, ...postRows];
+            callback({ success: true, data: combinedRows });
+        });
     });
 };
