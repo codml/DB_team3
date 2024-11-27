@@ -52,8 +52,10 @@
         <p><strong>성별:</strong> {{ product.Sex }}</p>
         <p><strong>신고 당한 횟수:</strong> {{ product.Rp_cnt }}</p>
         <p><strong>평점:</strong> {{ product.Avg_rating }}</p>
+      </div>
 
-        <!-- 게시물 신고 -->
+      <!-- 게시물 신고 -->
+      <div class="report-info">
         <h2>게시물 신고</h2>
         <textarea
           v-model="reportContent"
@@ -61,6 +63,9 @@
           class="report-textarea"
         ></textarea>
         <button @click="reportProduct" class="report-button">신고</button>
+        
+        <!-- 구매 요청 버튼 추가 -->
+        <button @click="requestProduct" class="request-button">구매 요청</button>
       </div>
     </div>
 
@@ -192,6 +197,8 @@ export default {
     },
     async deleteProduct() {
       try {
+        if (!confirm("정말로 삭제하시겠습니까?"))
+          return;
         const response = await axios.get(`http://localhost:3000/delete/${this.ino}`);
         if (response.data.success) {
           alert("게시글이 삭제되었습니다.");
@@ -202,6 +209,9 @@ export default {
       } catch (error) {
         console.error("게시글 삭제 중 오류 발생:", error);
       }
+    },
+    requestProduct() {
+      this.$router.push(`/request/${this.ino}`); // 구매 요청 페이지로 이동
     },
     updateProduct() {
       this.$router.push(`/update/${this.ino}`);
@@ -249,6 +259,80 @@ export default {
   object-fit: contain;
 }
 
+.product-title {
+  text-align: center;
+  font-size: 28px; /* 제목 크기 키움 */
+  margin: 15px 0 10px; /* 이미지와 제목 간의 간격 */
+  color: #333; /* 제목 색상 */
+  font-weight: bold;
+}
+
+.info-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* 3분할 */
+  gap: 20px;
+}
+
+.product-info,
+.seller-info,
+.report-info {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.report-textarea {
+  width: 100%;
+  height: 100px; /* 신고 textarea 높이 조정 */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.report-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.report-button:hover {
+  background-color: #c0392b;
+}
+
+/* 삭제 및 수정 버튼 */
+.action-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.delete-button,
+.update-button {
+  padding: 10px 20px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.update-button {
+  background-color: #4caf50;
+  color: white;
+}
+
 .arrow-button {
   position: absolute;
   top: 50%;
@@ -276,128 +360,34 @@ export default {
   cursor: not-allowed;
 }
 
-.image-info {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #666;
-}
-
-.product-title {
-  text-align: center;
-  font-size: 24px;
-  margin: 15px 0 10px; /* 이미지와 제목 간의 간격 */
-  color: #333; /* 제목 색상 */
-  font-weight: bold;
-}
-
-/* 상품 정보 및 판매자 정보 레이아웃 */
-.info-layout {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.product-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.seller-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.report-textarea {
-  width: 100%;
-  height: 10px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.report-button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.report-button:hover {
-  background-color: #c0392b;
-}
-
-/* 상품 내용 */
-.product-description {
-  margin-top: 30px;
-  border-top: 2px solid #ccc;
-  padding-top: 15px;
-}
-
-.product-description h2 {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-.product-description p {
-  font-size: 18px;
-  line-height: 1.6;
-}
-
-/* 버튼 */
+/* 좋아요 버튼 원래 스타일 복구 */
 .like-button {
-  background-color: #ff6f61;
+  background-color: #ff6f61; /* 원래 색상 */
   color: white;
   border: none;
   border-radius: 5px;
   padding: 5px 10px;
   cursor: pointer;
+  font-size: 16px; /* 버튼 텍스트 크기 */
 }
 
 .like-button:hover {
-  background-color: #e65b50;
+  background-color: #e65b50; /* 호버 색상 */
 }
 
-.action-buttons-container {
-  display: flex;
-  justify-content: space-between; /* 버튼을 양 끝에 배치 */
-  align-items: center; /* 세로 정렬 */
-  margin: 20px 0; /* 상하 간격 추가 */
-}
-
-.delete-button, .update-button {
-  padding: 10px 20px; /* 버튼 크기 조정 */
-  font-size: 18px; /* 버튼 글자 크기 */
-  border: none; /* 기본 테두리 제거 */
-  border-radius: 5px; /* 약간 둥근 모서리 */
-  cursor: pointer; /* 클릭 가능한 버튼 표시 */
-  transition: background-color 0.3s ease; /* 마우스 호버 시 색상 전환 */
-}
-
-/* 삭제 버튼 스타일 */
-.delete-button {
-  background-color: #f44336; /* 빨간색 배경 */
+.request-button {
+  margin-top: 10px;
+  background-color: #3498db; /* 파란색 */
   color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  display: block; /* 버튼을 한 줄 아래로 배치 */
 }
 
-.delete-button:hover {
-  background-color: #d32f2f; /* 조금 더 어두운 빨간색 */
+.request-button:hover {
+  background-color: #2980b9; /* 호버 시 더 진한 파란색 */
 }
-
-/* 수정 버튼 스타일 */
-.update-button {
-  background-color: #4caf50; /* 초록색 배경 */
-  color: white;
-}
-
-.update-button:hover {
-  background-color: #388e3c; /* 조금 더 어두운 초록색 */
-}
-
 </style>
