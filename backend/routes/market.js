@@ -23,6 +23,8 @@ router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
 router.get('/mypage', mypageController.getUserInformation);
 router.post('/mypage', upload.single("Profile_image"), mypageController.modifyUserInformation);
+router.get('/mypage/sale', mypageController.getSaleItems);
+router.get('/mypage/purchase', mypageController.getPurchaseItems);
 router.post('/write', writeController.insertItems);
 router.get('/search', searchController.searchItems);
 router.get('/read/:Ino', readController.readItem);

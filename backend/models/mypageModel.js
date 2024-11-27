@@ -49,4 +49,43 @@ exports.modifyUser = (userData, callback) => {
 		console.log("업데이트 결과:", rows);
 		callback('success');
 	  });
-}
+};
+
+exports.getSaleItems = (userID, callback) => {
+	console.log('Call getSaleItems');
+	var sql = 'SELECT * FROM item_datas WHERE Uid = ?;';
+	connection.query(sql, userID, (err, rows) => {
+		if (err) {
+            console.error("DB 오류");
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("판매상품이 존재하지 않음");
+            callback('Item not exists');
+            return;
+        }
+		callback('success', rows); // 성공 시 사용자 데이터 반환
+	  });
+};
+
+
+exports.getPurchaseItems = (userID, callback) => {
+	console.log('Call getPurchaseItems');
+	var sql = 'SELECT * FROM item_datas WHERE B_uid = ? ORDER BY Reg_date;';
+	connection.query(sql, userID, (err, rows) => {
+		if (err) {
+            console.error("DB 오류" + err.sqlMessage);
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("구매상품이 존재하지 않음");
+            callback('Item not exists');
+            return;
+        }
+		callback('success', rows); // 성공 시 사용자 데이터 반환
+	  });
+};
