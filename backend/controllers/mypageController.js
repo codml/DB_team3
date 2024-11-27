@@ -34,3 +34,7 @@ exports.getUserInformation = (req, res, next) => {
 			return res.status(401).json({ message: status });
 	});
 };
+
+exports.modifyUserInformation = (req, res, next) => {
+    
+};

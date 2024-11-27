@@ -43,7 +43,7 @@
 					</label>
 					<label>
 						<strong>성별:</strong>
-						<select v-model="user.Sex">
+						<select v-model="user.Sex" required >
 						<option value="남성">남성</option>
 						<option value="여성">여성</option>
 						</select>
@@ -70,10 +70,11 @@
 							alt="Image from server"
 						/>
 						<p v-else>이미지가 없습니다</p>
-						<div class="form-group">
-							<label>프로필 이미지 변경:</label>
-							<input type="file" @change="onImageChange" />
-						</div>
+					</div>
+					<!-- 이미지 변경 -->
+					<div class="form-group">
+						<label>프로필 이미지 변경:</label>
+						<input type="file" @change="onImageChange" />
 					</div>
 				</div>
 			</div>
@@ -130,7 +131,7 @@ export default {
 				};
 
 				// 서버에 POST 요청 보내기
-				const response = await axios.post('http://localhost:3000/api/change-password', requestData, {
+				const response = await axios.post('http://localhost:3000/mypage', requestData, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('token')}` // 인증 토큰 포함
 					}

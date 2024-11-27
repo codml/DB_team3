@@ -31,3 +31,6 @@ exports.getUser = (userID, callback) => {
     });
 };
 
+exports.modifyUser = (userData, callback) => {
+	
+}
