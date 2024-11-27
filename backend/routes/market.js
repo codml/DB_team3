@@ -16,7 +16,7 @@ var writeController = require('../controllers/writeController');
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
 router.get('/mypage', mypageController.getUserInformation);
-router.post('/mypage', mypageController.modifyUserInformation);
+router.post('/mypage', upload.single("Profile_image"), mypageController.modifyUserInformation);
 router.post('/write', writeController.insertItems);
 router.get('/search', searchController.searchItems);
 router.get('/boardpage', boardpageController.getBoardPosts);

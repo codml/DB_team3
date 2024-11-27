@@ -54,7 +54,23 @@ import axios from "axios";
 export default {
 	data() {
 		return {
-			user: null,         // 사용자 데이터 저장
+			// 사용자 데이터 저장
+			user: {
+				Uname: null,
+				Age: null,
+				Sex: null,
+				Phone: null,
+				Email: null,
+				Address: null,
+				Id: null,
+				Passwd: null,
+				Auth: null,
+				Nickname: null,
+				Profile_image: null,
+				Rp_cnt: null,
+				Rating_cnt: null,
+				Avg_rating: null
+			},
 			loading: true,      // 로딩 상태
 			error: null         // 에러 메시지
 		};

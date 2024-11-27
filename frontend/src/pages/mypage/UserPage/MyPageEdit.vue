@@ -27,11 +27,11 @@
 					</label>
 					<label>
 						<strong>비밀번호:</strong>
-						<input type="password" v-model="user.Passwd" />
+						<input type="password" v-model="user.Passwd" required/>
 					</label>
 					<label>
 						<strong>이름:</strong>
-						<input type="text" v-model="user.Uname" />
+						<input type="text" v-model="user.Uname" required/>
 					</label>
 					<label>
 						<strong>닉네임:</strong>
@@ -39,26 +39,26 @@
 					</label>
 					<label>
 						<strong>나이:</strong>
-						<input type="number" v-model="user.Age" />
+						<input type="number" v-model="user.Age" required/>
 					</label>
 					<label>
 						<strong>성별:</strong>
 						<select v-model="user.Sex" required >
-						<option value="남성">남성</option>
-						<option value="여성">여성</option>
+						<option value="남">남성</option>
+						<option value="여">여성</option>
 						</select>
 					</label>
 					<label>
 						<strong>전화번호:</strong>
-						<input type="text" v-model="user.Phone" />
+						<input type="text" v-model="user.Phone" required/>
 					</label>
 					<label>
 						<strong>이메일:</strong>
-						<input type="email" v-model="user.Email" />
+						<input type="email" v-model="user.Email" required/>
 					</label>
 					<label>
 						<strong>주소:</strong>
-						<input type="text" v-model="user.Address" />
+						<input type="text" v-model="user.Address" required/>
 					</label>
 				</div>
 				<div class="profile-right">
@@ -74,7 +74,12 @@
 					<!-- 이미지 변경 -->
 					<div class="form-group">
 						<label>프로필 이미지 변경:</label>
-						<input type="file" @change="onImageChange" />
+						<input type="file" @change="onImageChange" accept="image/*" />
+						<img 
+							v-if="new_image" 
+							:src="`data:image/jpeg;base64,${new_image}`" 
+							alt="Image from local"
+						/>
 					</div>
 				</div>
 			</div>
@@ -90,9 +95,28 @@ import axios from "axios";
 export default {
 	data() {
 		return {
-			user: null,         // 사용자 데이터 저장
+			// 사용자 데이터 저장
+			user: {
+				Uname: null,
+				Age: null,
+				Sex: null,
+				Phone: null,
+				Email: null,
+				Address: null,
+				Id: null,
+				Passwd: null,
+				Auth: null,
+				Nickname: null,
+				Profile_image: null,
+				Rp_cnt: null,
+				Rating_cnt: null,
+				Avg_rating: null
+			},
+			new_image: null,
+			
+			
 			loading: true,      // 로딩 상태
-			error: null         // 에러 메시지
+			error: null,        // 에러 메시지
 		};
 	},
   
@@ -122,34 +146,55 @@ export default {
 	},
 
 	methods: {
-		async saveProfile() {
-			try {
-				// 요청할 데이터 준비
-				const requestData = {
-					currentPassword: this.currentPassword,
-					newPassword: this.newPassword
-				};
-
-				// 서버에 POST 요청 보내기
-				const response = await axios.post('http://localhost:3000/mypage', requestData, {
-					headers: {
-						Authorization: `Bearer ${localStorage.getItem('token')}` // 인증 토큰 포함
-					}
-				});
-
-				// 성공 처리
-				console.log('Password changed successfully:', response.data);
-				alert('비밀번호가 성공적으로 변경되었습니다.');
-			} catch (error) {
-				// 오류 처리
-				console.error('Error changing password:', error);
-				if (error.response && error.response.data) {
-					alert(error.response.data.message || '비밀번호 변경에 실패했습니다.');
-				} else {
-					alert('서버와 연결할 수 없습니다.');
+		// 폼 유효성 검사
+		validateForm() {
+			const requiredFields = ["Passwd", "Uname", "Age", "Sex", "Phone", "Email", "Address"];
+			for (const field of requiredFields) {
+				if (!this.user[field]) {
+					alert(`${field}를(을) 입력해주세요.`);
+					return false;
 				}
 			}
-		}
+			return true;
+		},
+		onImageChange(event) {
+			this.new_image = event.target.files[0];
+		},
+
+		async saveProfile() {
+			if (!this.validateForm()) {
+				return; // 유효성 검사를 통과하지 못하면 서버로 요청하지 않음
+			}
+			
+			const formData = new FormData();
+
+			// 사용자 데이터를 FormData에 추가
+			for (const key in this.user) {
+				if (key === "Profile_image") {
+					if(this.new_image)
+						formData.append(key, this.new_image); // 이미지 파일
+					else
+						formData.append(key, ''); // 이미지 파일
+				} else {
+					formData.append(key, this.user[key]); // 일반 필드
+				}
+			}
+
+			try {
+				const response = await axios.post("http://localhost:3000/mypage", formData, {
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				});
+
+				alert('업데이트 성공');
+				console.log("업데이트 성공:", response.data);
+				this.$router.push('/mypage')
+			} catch (error) {
+				alert('업데이트 실패');
+				console.error("업데이트 실패:", error.response?.data || error.message);
+			}
+		},
 	}
 };
 </script>

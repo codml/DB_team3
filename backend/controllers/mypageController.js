@@ -6,7 +6,9 @@ var dotenv = require('dotenv');
 dotenv.config();
 const KEY = process.env.SECRET_KEY;
 
+
 exports.getUserInformation = (req, res, next) => {
+	console.log('Call getUserInformation');
     const authHeader = req.headers['authorization']; // Authorization 헤더에서 토큰 추출
     if (!authHeader) {
         return res.status(401).json({ message: 'Authorization header missing' });
@@ -36,5 +38,30 @@ exports.getUserInformation = (req, res, next) => {
 };
 
 exports.modifyUserInformation = (req, res, next) => {
-    
+	console.log('Call modifyUserInformation');
+	const { body } = req;
+	const { file } = req;
+
+	console.log("수신된 데이터:", body); // 기타 사용자 데이터
+	console.log("업로드된 파일:", file); // 업로드된 파일 정보
+
+	if (file) {
+		body.Profile_image = req.file.buffer;
+    }
+
+	console.log('body check: ' + JSON.stringify(body.Nickname));
+	// null 체크
+	for (const key in body) {
+		if (body[key] === '')
+			body[key] = null;
+	}
+	
+	mypageModel.modifyUser(body, status => {
+		if(status === 'success'){
+			return res.status(200).json({ message: 'Update user information success'});
+		}
+		else
+			return res.status(401).json({ message: status });
+	})
+	
 };
