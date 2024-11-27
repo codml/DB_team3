@@ -1,10 +1,10 @@
 <template>
   <div class="request-page">
     <h1>구매 요청 페이지</h1>
-    <p>상품 번호: {{ ino }}</p>
     <div v-if="isLoading">로딩 중...</div>
     <div v-else>
-      <div v-if="requestData && requestData.length > 0">
+      <!-- 요청 데이터가 있을 경우 -->
+      <div v-if="requestData && requestData.length > 0 && !isOnlySellerId">
         <table class="request-table">
           <thead>
             <tr>
@@ -16,7 +16,7 @@
               <th>연락 방법</th>
               <th>등록일</th>
               <th>삭제</th>
-              <th v-if="isOwner">거래 수락</th>
+              <th v-if="isSeller">거래 수락</th>
             </tr>
           </thead>
           <tbody>
@@ -29,47 +29,63 @@
               <td>{{ request.Contact }}</td>
               <td>{{ formatDate(request.Reg_date) }}</td>
               <td>
-                <button @click="deleteRequest(request.R_uid)">삭제</button>
+                <button 
+                  class="delete-button" 
+                  @click="deleteRequest(request.R_uid)"
+                >삭제</button>
               </td>
-              <td v-if="isOwner">
-                <button @click="acceptRequest(request.R_uid)">수락</button>
+              <td v-if="isSeller">
+                <button 
+                  class="accept-button" 
+                  @click="acceptRequest(request.R_uid)"
+                >수락</button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div v-else>
-        <p>현재 요청된 데이터가 없습니다. 구매 요청을 보내보세요.</p>
-        <!-- Request 입력 폼 -->
-        <div class="request-form">
-          <textarea
-            v-model="newRequest.content"
-            placeholder="요청 내용을 입력하세요"
-          ></textarea>
-          <div class="form-fields">
-            <label>
-              거래 방식:
-              <select v-model="newRequest.dealWay">
-                <option value="0">직거래</option>
-                <option value="1">택배 거래</option>
-              </select>
-            </label>
-            <label>
-              거래 지역:
-              <input type="text" v-model="newRequest.location" />
-            </label>
-            <label>
-              연락처:
-              <input type="text" v-model="newRequest.phone" />
-            </label>
-            <label>
-              연락 방법:
-              <input type="text" v-model="newRequest.contact" />
-            </label>
+
+      <!-- 요청 데이터가 비어 있고 S_uid가 로그인한 ID와 다를 경우 -->
+      <div v-else-if="isOnlySellerId && !isSeller">
+        <p>현재 요청된 데이터가 없습니다.</p>
+        <div>
+          <p>구매 요청을 보내보세요.</p>
+          <div class="request-form">
+            <textarea
+              v-model="newRequest.content"
+              placeholder="요청 내용을 입력하세요"
+            ></textarea>
+            <div class="form-fields">
+              <label>
+                거래 방식:
+                <select v-model="newRequest.dealWay">
+                  <option value="0">직거래</option>
+                  <option value="1">택배 거래</option>
+                </select>
+              </label>
+              <label>
+                거래 지역:
+                <input type="text" v-model="newRequest.location" />
+              </label>
+              <label>
+                연락처:
+                <input type="text" v-model="newRequest.phone" />
+              </label>
+              <label>
+                연락 방법:
+                <input type="text" v-model="newRequest.contact" />
+              </label>
+            </div>
+            <button @click="sendRequest">요청 보내기</button>
           </div>
-          <button @click="sendRequest">요청 보내기</button>
         </div>
       </div>
+
+      <!-- 요청 데이터가 비어 있고 S_uid가 로그인한 ID와 같을 경우 -->
+      <div v-else-if="isOnlySellerId && isSeller">
+        <p>판매자는 자신에게 요청을 보낼 수 없습니다.</p>
+      </div>
+
       <!-- 뒤로가기 버튼 -->
       <div class="back-button-container">
         <button @click="goBack">뒤로가기</button>
@@ -87,16 +103,18 @@ export default {
   data() {
     return {
       requestData: null,
-      userID: "", // 접속 중인 사용자 ID
-      auth: "", // 접속 중인 사용자 권한
-      sellerID: "", // S_uid (상품 판매자 ID)
-      isLoading: true, // 로딩 상태
+      userID: "",
+      auth: "",
+      sellerID: "",
+      isLoading: true,
+      isOnlySellerId: false, // S_uid만 있는 경우를 처리하기 위한 플래그
+      isSeller: false,
       newRequest: {
-        content: "", // 요청 내용
-        dealWay: "0", // 거래 방식 (직거래: 0, 택배 거래: 1)
-        location: "", // 거래 지역
-        phone: "", // 연락처
-        contact: "", // 연락 방법
+        content: "",
+        dealWay: "0",
+        location: "",
+        phone: "",
+        contact: "",
       },
     };
   },
@@ -108,40 +126,56 @@ export default {
   },
   methods: {
     async fetchRequestData() {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("토큰이 존재하지 않습니다.");
-        }
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("토큰이 존재하지 않습니다.");
+    }
 
-        // 토큰 디코딩하여 사용자 정보 가져오기
-        const user = jwtDecode(token);
-        this.userID = user.userID;
-        this.auth = user.auth;
+    // 로그인한 사용자 정보 가져오기
+    const user = jwtDecode(token);
+    this.userID = user.userID;
+    this.auth = user.auth;
 
-        // 요청 데이터 가져오기
-        const response = await axios.get(`http://localhost:3000/request/${this.ino}`, {
-          params: { userId: this.userID },
-          headers: { "Cache-Control": "no-cache" },
-        });
+    // 요청 데이터 가져오기
+    const response = await axios.get(`http://localhost:3000/request/${this.ino}`, {
+      params: { userId: this.userID },
+      headers: { "Cache-Control": "no-cache" },
+    });
 
-        if (Array.isArray(response.data)) {
-          this.requestData = response.data;
-        } else {
-          this.requestData = [response.data];
-        }
+    if (Array.isArray(response.data)) {
+      this.requestData = response.data;
 
-        // S_uid(판매자 ID) 가져오기
-        if (this.requestData.length > 0) {
-          this.sellerID = this.requestData[0].S_uid;
-        }
-      } catch (error) {
-        console.error("fetchRequestData: 요청 데이터 가져오기 오류 -", error);
-        this.requestData = [];
-      } finally {
-        this.isLoading = false;
-      }
-    },
+      // S_uid만 포함된 요청인지 확인
+      const firstRequest = response.data[0];
+      console.log(firstRequest);
+      this.isOnlySellerId =
+        response.data.length === 1 &&
+        firstRequest.S_uid &&
+        !firstRequest.Content &&
+        !firstRequest.Deal_way &&
+        !firstRequest.Location &&
+        !firstRequest.Phone &&
+        !firstRequest.Contact;
+
+      // 현재 사용자와 판매자 ID 비교
+      this.isSeller = this.userID === (firstRequest?.S_uid || "");
+    } else {
+      this.requestData = [];
+      this.isOnlySellerId = false;
+      this.isSeller = false;
+    }
+  } catch (error) {
+    console.error("fetchRequestData: 요청 데이터 가져오기 오류 -", error);
+    this.requestData = [];
+    this.isOnlySellerId = false;
+    this.isSeller = false;
+  } finally {
+    this.isLoading = false;
+    console.log("isOnlySellerId:", this.isOnlySellerId);
+    console.log("isSeller:", this.isSeller);
+  }
+},
     formatDate(dateString) {
       const options = { year: "numeric", month: "2-digit", day: "2-digit" };
       return new Date(dateString).toLocaleDateString("ko-KR", options);

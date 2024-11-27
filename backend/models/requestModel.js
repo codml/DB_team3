@@ -10,26 +10,28 @@ var connection = mysql.createConnection({
 exports.getRequestData = (ino, userId, callback) => {
     const query = `
         SELECT 
-            r.Ino, 
-            r.R_uid, 
-            r.Content, 
-            r.Deal_way, 
-            r.Location, 
-            r.Phone, 
-            r.Contact, 
-            r.Reg_date,
-            I.uid as S_uid
-        FROM 
-            request r
-        JOIN 
-            item_datas i ON r.Ino = i.Ino
-        WHERE 
-            r.Ino = ? AND (r.R_uid = ? OR i.uid = ?)
+    r.Ino, 
+    r.R_uid, 
+    r.Content, 
+    r.Deal_way, 
+    r.Location, 
+    r.Phone, 
+    r.Contact, 
+    r.Reg_date,
+    i.uid AS S_uid
+FROM 
+    request r
+RIGHT OUTER JOIN 
+    item_datas i 
+ON 
+    r.Ino = i.Ino AND (r.R_uid = ? OR i.uid = ?)
+WHERE 
+    i.Ino = ?;
     `;
 
     console.debug("getRequestData: 쿼리 실행 -", query, "파라미터 -", [ino, userId, userId]);
 
-    connection.query(query, [ino, userId, userId], (err, results) => {
+    connection.query(query, [userId, userId, ino], (err, results) => {
         if (err) {
             console.error("getRequestData: 쿼리 오류 -", err);
             return callback(err, null);
