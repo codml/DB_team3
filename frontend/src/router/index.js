@@ -23,7 +23,7 @@ const routes = [
   {
     path: '/mypage/sale',
     name: 'mysale',
-    component: () => import('../pages/mypage/UserPage/MyPageEdit.vue')
+    component: () => import('../pages/mypage/UserPage/MyPageSale.vue')
   },
   {
     path: '/mypage/purchase',
