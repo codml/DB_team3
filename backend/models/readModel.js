@@ -10,7 +10,20 @@ var connection = mysql.createConnection({
 
 // 게시물 검색 함수
 exports.readItem = (Ino, callback) => {
-    let query = 'SELECT * FROM item_datas, usr WHERE Ino=? AND Uid = Id';
+    let query =`SELECT I.*, U.*,
+                    R.Ratings,
+                    R.Content AS ReviewContent,
+                    R.Reg_date AS ReviewReg_date
+                FROM 
+                    item_datas I
+                JOIN 
+                    usr U 
+                    ON I.Uid = U.Id
+                LEFT JOIN 
+                    review R 
+                    ON I.Ino = R.Ino
+                WHERE 
+                    I.Ino = ?`;
     let queryParams = [Ino];
 
     // 쿼리 실행
@@ -74,6 +87,21 @@ exports.reportItem = (Ino, req, callback) => {
                 console.error("쿼리 실행 중 오류 발생:", err);
                 callback(err); // 다른 에러 전달
             }
+        } else {
+            callback(null); // 성공 시 데이터 전달
+        }
+    });
+};
+
+exports.reviewItem = (Ino, req, callback) => {
+    let query = 'INSERT INTO review VALUES (?, ?, ?, ?, ?, NOW())';
+    let queryParams = [Ino, req.S_uid, req.B_uid, req.Content, req.Ratings];
+
+    // 쿼리 실행
+    connection.query(query, queryParams, (err, rows) => {
+        if (err) {
+            console.error("쿼리 실행 중 오류 발생:", err);
+            callback(err); // 에러 전달
         } else {
             callback(null); // 성공 시 데이터 전달
         }

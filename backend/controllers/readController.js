@@ -76,3 +76,18 @@ exports.reportItem = (req, res) => {
             res.json({success: true});
     });
 };
+
+exports.reviewItem = (req, res) => {
+    var Ino = req.params.Ino;
+    console.log(Ino);
+
+    // readModel 호출
+    readModel.reviewItem(Ino, req.body, (err) => {
+        if (err) {
+            console.error("query error");
+            res.status(500).json({ error: "Query execution failed." });
+        }
+        else
+            res.json({success: true});
+    });
+};
