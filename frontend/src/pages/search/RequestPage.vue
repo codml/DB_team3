@@ -16,7 +16,7 @@
               <th>연락 방법</th>
               <th>등록일</th>
               <th>삭제</th>
-              <th v-if="isSeller">거래 수락</th>
+              <th v-if="isSeller">수락</th>
             </tr>
           </thead>
           <tbody>
@@ -251,7 +251,7 @@ export default {
 <style scoped>
 
 .request-page {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 30px auto;
   padding: 30px;
   border: 2px solid #e0e0e0;
@@ -276,13 +276,25 @@ export default {
   padding: 12px 15px;
   text-align: left; /* 모든 칸을 왼쪽 정렬 */
   border-bottom: 1px solid #e0e0e0;
+
+  font-size: 14px; /* 글씨 크기를 줄임 */
 }
+
 
 .request-table th {
   background-color: #f4f4f4;
   font-weight: bold;
   color: #333;
   text-align: left; /* 헤더도 왼쪽 정렬 */
+  font-size: 14px; /* 글씨 크기를 줄임 */
+}
+.request-table th:nth-child(1),
+.request-table td:nth-child(1) {
+  width: 10%; /* 내용 칸의 너비를 줄임 */
+}
+.request-table th:nth-child(2),
+.request-table td:nth-child(2) {
+  width: 20%; /* 내용 칸의 너비를 줄임 */
 }
 
 .request-table button {
