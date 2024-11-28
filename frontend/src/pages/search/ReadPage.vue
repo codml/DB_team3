@@ -129,8 +129,18 @@
               </div>
               <div v-else>
                 <p><strong>내용:</strong> {{ product.ReviewContent }}</p>
-                <p><strong>별점:</strong> {{ product.Ratings }} / 5</p>
-                <p><strong>등록일:</strong> {{ formatDate(product.ReviewReg_Date) }}</p>
+                <div class="ratings-display">
+                  <p><strong>별점:</strong></p>
+                  <!-- 별점 출력 -->
+                  <span
+                    v-for="star in product.Ratings"
+                    :key="'display-' + star"
+                    class="star_static"
+                  >
+                    ★
+                  </span>
+                </div>
+                <p><strong>등록일:</strong> {{ formatDate(product.ReviewReg_date) }}</p>
               </div>
             </div>
           </div>
