@@ -7,10 +7,10 @@
 		<!-- 마이페이지 메뉴 -->
 		<aside class="sidebar">
 			<ul>
-			<li @click="navigate('회원정보수정')">회원정보수정</li>
-			<li @click="navigate('나의 판매 내역')">나의 판매 내역</li>
-			<li @click="navigate('나의 구매 내역')">나의 구매 내역</li>
-			<li @click="navigate('내가 찜한 상품')">내가 찜한 상품</li>
+			<li @click="$router.push('/mypage/edit')">나의 정보 수정</li>
+			<li @click="$router.push('/mypage/sale')">나의 판매 내역</li>
+			<li @click="$router.push('/mypage/purchase')">나의 구매 내역</li>
+			<li @click="$router.push('/mypage/likelist')">내가 찜한 상품</li>
 			</ul>
 		</aside>
 
@@ -19,9 +19,29 @@
 		<section class="profile">
 			<h2>사용자 프로필</h2>
 			<div class="profile-content">
-				<!-- 이미지 출력 -->
-				<img v-if="user.Profile_image"  :src="`data:image/jpeg;base64,${user.Profile_image}`" alt="Image from server" />
-				<p v-else>이미지가 없습니다</p>
+				<div class="profile-left">
+					<!-- 사용자 추가 정보 -->
+					<p><strong>아이디:</strong> {{ user.Id || '정보 없음' }}</p>
+					<p><strong>비밀번호:</strong> {{ user.Passwd || '정보 없음' }}</p>
+					<p><strong>이름:</strong> {{ user.Uname || '정보 없음' }}</p>
+					<p><strong>닉네임:</strong> {{ user.Nickname || '정보 없음' }}</p>
+					<p><strong>나이:</strong> {{ user.Age || '정보 없음' }}</p>
+					<p><strong>성별:</strong> {{ user.Sex || '정보 없음' }}</p>
+					<p><strong>전화번호:</strong> {{ user.Phone || '정보 없음' }}</p>
+					<p><strong>이메일:</strong> {{ user.Email || '정보 없음' }}</p>
+					<p><strong>주소:</strong> {{ user.Address || '정보 없음' }}</p>
+				</div>
+				<div class="profile-right">
+					<!-- 이미지 출력 -->
+					<div class="profile-image-wrapper">
+						<img 
+							v-if="user.Profile_image" 
+							:src="`data:image/jpeg;base64,${user.Profile_image}`" 
+							alt="Image from server"
+						/>
+						<p v-else>이미지가 없습니다</p>
+					</div>
+				</div>
 			</div>
 		</section>
 		</main>
@@ -34,7 +54,23 @@ import axios from "axios";
 export default {
 	data() {
 		return {
-			user: null,         // 사용자 데이터 저장
+			// 사용자 데이터 저장
+			user: {
+				Uname: null,
+				Age: null,
+				Sex: null,
+				Phone: null,
+				Email: null,
+				Address: null,
+				Id: null,
+				Passwd: null,
+				Auth: null,
+				Nickname: null,
+				Profile_image: null,
+				Rp_cnt: null,
+				Rating_cnt: null,
+				Avg_rating: null
+			},
 			loading: true,      // 로딩 상태
 			error: null         // 에러 메시지
 		};
@@ -114,8 +150,42 @@ export default {
 }
 
 .profile-content {
-  border: 1px solid #ccc;
-  padding: 20px;
-  height: 300px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  height: 300px; /* 프로필 영역 높이 설정 */
 }
+
+.profile-left {
+  flex: 1;
+}
+
+.profile-right {
+  flex: 0 0 50%; /* 프로필 오른쪽 크기를 설정 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-image-wrapper {
+  width: 80%; /* profile-content의 절반 정도 크기로 설정 */
+  padding-top: 80%; /* 1:1 비율 유지 */
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px; /* 모서리를 둥글게 처리 */
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 비율을 유지하며 이미지를 채움 */
+  border-radius: 15px;
+}
+
 </style>
