@@ -97,29 +97,46 @@ export default {
 
       for (let location of itemLocations.data.location) {
         try {
-          const { x, y } = location; // 경도(x)와 위도(y) 정보 추출
-          const { roadAddress } = location;
+          const { X, Y } = location; // 경도(x)와 위도(y) 정보 추출
+          const { Address } = location;
+          const { Ino, Title } = location;
+
+          // 각 마커에 대해 고유한 infoWindow 생성
+          const infoWindow = new naver.maps.InfoWindow({
+            content: `
+              <div>
+                <strong>주소:</strong> ${Address}<br><strong>제목:</strong> ${Title}
+              </div>
+            `,
+            maxWidth: 300, // 최대 너비
+          });
 
           // 마커를 지도에 추가
           const marker = new naver.maps.Marker({
-            position: new naver.maps.LatLng(parseFloat(y), parseFloat(x)),
+            position: new naver.maps.LatLng(parseFloat(X), parseFloat(Y)),
             map: this.map,
           });
 
-          // 마커에 마우스를 올렸을 때 정보 창을 보여줍니다.
-        const infoWindow = new naver.maps.InfoWindow({
-          content: `<div style="padding: 5px;">거래 장소 : ${roadAddress}</div>`,
-          borderColor: '#6f6f6f',
-          backgroundColor: '#fff',
-        });
+          // 마커에 mouseover 이벤트 추가. 마커에 마우스를 올렸을 때 정보 창을 보여줍니다.
+          naver.maps.Event.addListener(marker, 'mouseover', () => {
+            infoWindow.open(this.map, marker); // infoWindow 표시
+          });
 
-        naver.maps.Event.addListener(marker, 'mouseover', () => {
-          infoWindow.open(this.map, marker);
-        });
+          // 마커에 mouseout 이벤트 추가. 마우스가 마커에서 벗어나면 정보창을 닫을지 여부를 판단
+          naver.maps.Event.addListener(marker, 'mouseout', () => {
+            infoWindow.close(); // 정보창 닫기
+          });
 
-        naver.maps.Event.addListener(marker, 'mouseout', () => {
-          infoWindow.close();
-        });
+          // 마커에 click 이벤트 추가. 마커를 클릭했을 때 URL로 이동
+          naver.maps.Event.addListener(marker, 'click', () => {
+            infoWindow.close(); // 정보창 닫기
+            
+            // 이동할 URL 설정 (예: `Ino`를 사용하여 URL 생성)
+            const url = `http://localhost:8080/read/${Ino}`;
+            
+            // URL로 이동 (현재 창에서 이동)
+            window.location.href = url;
+          });
 
           this.markers.push(marker); // 마커 목록에 추가
         } catch (error) {

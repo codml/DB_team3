@@ -90,7 +90,16 @@ exports.getItemLocations = async (req, res) => {
 
                     // 주소 데이터가 있으면 배열에 추가
                     if (response?.data?.addresses) {
-                        addresses.push(...response.data.addresses); // 배열에 주소 추가
+                        response.data.addresses.forEach(address => {
+                            // 필요한 정보를 객체로 저장
+                            addresses.push({
+                                Address: address.roadAddress || address.jibunAddress, // 도로명 주소 또는 지번 주소
+                                X: address.y, // 위도
+                                Y: address.x, // 경도
+                                Ino: row.Ino, // 해당 장소의 URL (예시로 추가한 경우)
+                                Title: row.Title,
+                            });
+                        });
                     }
                 } catch (error) {
                     console.error(`Error fetching address for ${row.Place}:`, error.message);

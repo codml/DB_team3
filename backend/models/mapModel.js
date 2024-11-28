@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
 });
 
 exports.getItemLocations = (req, callback) => {
-    let query = `SELECT Place FROM item_datas`;
+    let query = `SELECT Ino, Title, Place FROM item_datas`;
 
     connection.query(query, (err, rows) => {
         if (err) {
