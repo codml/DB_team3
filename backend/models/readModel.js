@@ -111,6 +111,7 @@ exports.reviewItem = (Ino, req, callback) => {
 exports.readQnA = (Ino, callback) => {
     let query = `SELECT
                     Q.Qno AS QuesNo,
+                    A.Qno AS AnsNo,
                     Q.Q_uid AS Uid,
                     U.Uname AS Username,
                     Q.Content AS Question,
@@ -148,6 +149,21 @@ exports.writeQnA = (Ino, req, callback) => {
             callback(err); // 에러 전달
         } else {
             callback(null); // 성공 시 데이터 전달
+        }
+    });
+};
+
+exports.deleteQnA = (Qno, callback) => {
+    let query = 'DELETE FROM question WHERE Qno=? OR Ans_Qno=?';
+    let queryParams = [Qno, Qno];
+
+    // 쿼리 실행
+    connection.query(query, queryParams, (err) => {
+        if (err) {
+            console.error("게시물 삭제 중 오류 발생:", err);
+            callback(err);
+        } else {
+            callback(null);
         }
     });
 };

@@ -150,69 +150,116 @@
 
     <!-- 내용 -->
     <section class="product-description">
-        <h2>상품 내용</h2>
-        <p>{{ product.Content }}</p>
-      </section>
-      <section class="qna-section">
-        <h2>질문 및 답변</h2>
-        <div
-          v-for="(item) in qna"
-          :key="item.QuesNo"
-          class="qna-item"
-          @click="toggleAnswerInput(item.QuesNo)"
-        >
-          <!-- 질문 -->
-          <div v-if="item.Q_private === 1 && !(userID === item.Uid || product.Uid === userID)">
-            <span class="lock-icon">🔒</span> 비밀 질문입니다.
-          </div>
-          <div v-else>
-            <p class="question">
-              <strong>작성자: </strong> {{ item.Username }}
-              <span class="q-content"><strong>Q:</strong> {{ item.Question }}</span>
-              <span class="q-date">({{ formatDate(item.Q_date) }})</span>
-            </p>
-          </div>
-          <!-- 답변 -->
-          <div v-if="item.A_private === 1 && !(userID === item.Uid || product.Uid === userID)">
-            <span class="lock-icon">🔒</span> 비밀 답변입니다.
-          </div>
-          <div v-else>
-            <p v-if="item.Answer" class="answer">
-              <strong>ㄴ A:</strong> {{ item.Answer }}
-              <span class="a-date">({{ formatDate(item.A_date) }})</span>
-            </p>
-            <!-- 답변 입력 섹션 -->
-            <div v-else-if="userID === product.Uid">
-              <div
-                v-if="selectedQuestionIndex === item.QuesNo"
-                class="answer-input"
-                @click.stop
-              >
-                <textarea
-                  v-model="newAnswer"
-                  placeholder="답변을 작성해주세요."
-                  class="answer-textarea"
-                ></textarea>
-                <button @click.stop="submitAnswer(item.QuesNo)" class="submit-answer-button">
-                  답변 저장
-                </button>
-              </div>
+      <h2>상품 내용</h2>
+      <p>{{ product.Content }}</p>
+    </section>
+    <section class="qna-section">
+      <h2>질문 및 답변</h2>
+      <div
+        v-for="(item) in qna"
+        :key="item.QuesNo"
+        class="qna-item"
+        @click="toggleAnswerInput(item.QuesNo)"
+      >
+        <!-- 질문 -->
+        <div v-if="item.Q_private === 1 && !(userID === item.Uid || product.Uid === userID)">
+          <span class="lock-icon">🔒</span>   비밀 질문입니다.
+        </div>
+        <div v-else>
+          <p class="question">
+            <strong>작성자: </strong> {{ item.Username }}
+            <span class="q-content"><strong>Q:</strong> {{ item.Question }}</span>
+            <span class="q-date">({{ formatDate(item.Q_date) }})</span>
+            <!-- 삭제 버튼 -->
+            <button
+              v-if="userID === item.Uid"
+              @click="deleteQnA(item.QuesNo)"
+              class="qna-delete-button"
+            >
+              삭제
+            </button>
+          </p>
+        </div>
+        <!-- 답변 -->
+        <div v-if="item.A_private === 1 && !(userID === item.Uid || product.Uid === userID)">
+          ㄴ <span class="lock-icon">🔒</span>   비밀 답변입니다.
+        </div>
+        <div v-else>
+          <p v-if="item.AnsNo" class="answer">
+            <strong>ㄴ A:</strong> {{ item.Answer }}
+            <span class="a-date">({{ formatDate(item.A_date) }})</span>
+            <button
+              v-if="userID === product.Uid"
+              @click="deleteQnA(item.AnsNo)"
+              class="qna-delete-button"
+            >
+              삭제
+            </button>
+          </p>
+          <!-- 답변 입력 섹션 -->
+          <div v-else-if="userID === product.Uid">
+            <div
+              v-if="selectedQuestionIndex === item.QuesNo"
+              class="answer-input"
+              @click.stop
+            >
+              <textarea
+                v-model="newQnA"
+                placeholder="답변을 작성해주세요."
+                class="answer-textarea"
+              ></textarea>
+              <label>
+                <input
+                  type="radio"
+                  value="0"
+                  v-model="Private"
+                />
+                공개
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="1"
+                  v-model="Private"
+                />
+                비공개
+              </label>
+              <button @click.stop="submitQnA()" class="submit-answer-button">
+                답변 저장
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- 질문 작성 섹션 -->
-        <div v-if="userID !== product.Uid" class="add-question">
-          <textarea
-            v-model="newQuestion"
-            placeholder="질문을 작성해주세요."
-            class="question-textarea"
-          ></textarea>
-          <button @click="submitQuestion" class="submit-question-button">
-            질문 등록
-          </button>
-        </div>
-      </section>
+      <!-- 질문 작성 섹션 -->
+      <div v-if="userID !== product.Uid" class="add-question">
+        <textarea
+          v-model="newQnA"
+          placeholder="질문을 작성해주세요."
+          class="question-textarea"
+        ></textarea>
+        <label>
+          <input
+            type="radio"
+            value="0"
+            v-model="Private"
+          />
+          공개
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="1"
+            v-model="Private"
+          />
+          비공개
+        </label>
+        <button @click="submitQnA" class="submit-question-button">
+          질문 등록
+        </button>
+      </div>
+    </section>
 
     <!-- 삭제 버튼 -->
     <div class="action-buttons-container">
@@ -255,9 +302,9 @@ export default {
       ReviewContent: "", // 후기 내용
       Ratings: 0, // 별점 (1~5 정수 값)
       ReviewReg_date: "",
+      Private: 0,// 질문, 답변 글의 공개/비공개 여부
       selectedQuestionIndex: null, // 현재 선택된 질문 인덱스
-      newAnswer: "", // 새로 입력하는 답변 내용
-      newQuestion: "", // 새로 입력하는 질문 내용
+      newQnA: "", // 새로 입력하는 질문/답변 내용
     };
   },
   methods: {
@@ -402,8 +449,25 @@ export default {
         this.selectedQuestionIndex = QuesNo; // 선택된 질문 열기
       }
     },
-    async submitAnswer() {
-      if (!this.newAnswer.trim()) {
+    async deleteQnA(QuesNo) {
+      if (!confirm("정말로 삭제하시겠습니까?")) return;
+
+      try {
+        const response = await axios.delete(`http://localhost:3000/deleteQnA/${QuesNo}`);
+        if (response.data.success) {
+          alert("삭제되었습니다.");
+          window.location.reload();
+        } else {
+          alert("삭제 실패");
+          console.error("삭제 실패:", response.data.error);
+        }
+      } catch (error) {
+        alert("삭제 중 오류 발생");
+        console.error("삭제 중 오류 발생:", error);
+      }
+    },
+    async submitQnA() {
+      if (!this.newQnA.trim()) {
         alert("답변 내용을 입력해주세요.");
         return;
       }
@@ -411,45 +475,22 @@ export default {
       try {
         const response = await axios.post(`http://localhost:3000/writeQnA/${this.ino}`, {
           Ino: this.ino, // 상품 번호
-          Content: this.newAnswer,
-          Private: 0, // 비밀 여부 (0: 공개, 1: 비공개) - 예시로 설정
+          Content: this.newQnA,
+          Private: this.Private, // 비밀 여부 (0: 공개, 1: 비공개) - 예시로 설정
           Q_uid: this.userID, // 질문 작성자 ID
           Ans_Qno: this.selectedQuestionIndex,
         });
-        this.newAnswer = "";
         if (response.data.success) {
-          alert("답변이 등록되었습니다.");
+          alert("등록되었습니다.");
+          this.newQnA= "";
           window.location.reload();
         } else {
-          console.error("답변 등록 실패:", response.data.error);
+          alert("등록 실패");
+          console.error("등록 실패:", response.data.error);
         }
       } catch (error) {
-        console.error("답변 등록 중 오류 발생:", error);
-      }
-    },
-    async submitQuestion() {
-      if (!this.newQuestion.trim()) {
-        alert("질문 내용을 입력해주세요.");
-        return;
-      }
-
-      try {
-        const response = await axios.post(`http://localhost:3000/writeQnA/${this.ino}`, {
-          Ino: this.ino, // 상품 번호
-          Content: this.newQuestion,
-          Private: 0, // 비밀 여부 (0: 공개, 1: 비공개) - 예시로 설정
-          Q_uid: this.userID, // 질문 작성자 ID
-          Ans_Qno: this.selectedQuestionIndex,
-        });
-        this.newQuestion = ""; // 입력 내용 초기화
-        if (response.data.success) {
-          alert("질문이 등록되었습니다.");
-          window.location.reload();
-        } else {
-          console.error("질문 등록 실패:", response.data.error);
-        }
-      } catch (error) {
-        console.error("질문 등록 중 오류 발생:", error);
+        alert("등록 중 오류 발생");
+        console.error("등록 중 오류 발생:", error);
       }
     },
   },
@@ -562,6 +603,15 @@ export default {
 .delete-button {
   background-color: #f44336;
   color: white;
+}
+
+.qna-delete-button {
+  background-color: #f44336;
+  color: white;
+  margin-left: 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .update-button {
@@ -765,7 +815,7 @@ export default {
 
 .question-textarea,
 .answer-textarea {
-  width: 90%;
+  width: 95%;
   height: 80px;
   padding: 10px;
   border: 1px solid #ccc;
