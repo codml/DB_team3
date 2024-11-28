@@ -19,6 +19,7 @@
 
 <script>
 import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
 
 const NAVER_CLIENT_ID = process.env.VUE_APP_NAVER_CLIENT_ID;
 
@@ -38,20 +39,51 @@ export default {
     const script = document.createElement('script');
     script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_CLIENT_ID}`;
     script.onload = this.initMap;
+    script.onerror = () => {
+      console.error('네이버 지도 스크립트 로드 실패');
+      alert('네이버 지도 스크립트 로드 중 문제가 발생했습니다.');
+    };
     document.head.appendChild(script);
   },
   methods: {
     // 지도 초기화
-    initMap() {
+    async initMap() {
+      let initLocation = null;
+      let x = 0, y = 0;
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          x = 37.619897;
+          y = 127.059542;
+          initLocation = { x, y };
+        } else {
+          const decoded = jwtDecode(token);
+          const response = await axios.get('http://localhost:3000/userLocation', {
+            params: { user: decoded.userID },
+          });
+          const userLocation = response.data;
+          console.log(response.data.userLocation)
+          this.searchQuery = userLocation;
+          x = userLocation.X;
+          y = userLocation.Y;
+          initLocation = { x, y };
+        }
+      } catch (error) {
+        console.error('위치 정보를 로드하는 중 오류 발생:', error.message);
+        // 기본 위치 설정 (광운대학교)
+        initLocation = { x: 37.619897, y: 127.059542 };
+      }
+
       if (typeof naver !== 'undefined') {
         this.map = new naver.maps.Map('map', {
-          center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 좌표
+          center: new naver.maps.LatLng(initLocation.x, initLocation.y),
           zoom: 10,
         });
 
         const marker = new naver.maps.Marker({
-            position: new naver.maps.LatLng(37.5665, 126.9780),
-            map: this.map,
+          position: new naver.maps.LatLng(initLocation.x, initLocation.y),
+          map: this.map,
         });
 
         // 줌 레벨을 설정
@@ -64,18 +96,14 @@ export default {
 
     // 장소 검색 및 마커 표시
     async searchPlace() { 
-      if (!this.searchQuery) return alert('검색어를 입력하세요.');
-
-      console.log(this.searchQuery);
+      if (!this.searchQuery.trim()) return alert('검색어를 입력하세요.');
 
       try {
         const response = await axios.post('http://localhost:3000/map', {
-          query: this.searchQuery, // 검색어를 'query'라는 키로 서버에 전달
+          query: this.searchQuery.trim(),
         });
 
         const places = response.data.items;
-
-        console.log(places);
 
         // 이전 마커 제거
         this.clearMarkers();
@@ -84,8 +112,8 @@ export default {
         places.forEach((place) => {
           const marker = new naver.maps.Marker({
             position: new naver.maps.LatLng(
-              parseFloat(place.mapy) / 1e7, // 위도 (mapy)
-              parseFloat(place.mapx) / 1e7  // 경도 (mapx)
+              parseFloat(place.mapy),
+              parseFloat(place.mapx)
             ),
             map: this.map,
             title: place.title.replace(/<[^>]+>/g, ''), // 태그 제거
@@ -103,14 +131,11 @@ export default {
         if (places.length > 0) {
           const firstPlace = places[0];
           const latLng = new naver.maps.LatLng(
-            parseFloat(firstPlace.mapy) / 1e7, // 위도 (mapy)
-            parseFloat(firstPlace.mapx) / 1e7  // 경도 (mapx)
+            parseFloat(firstPlace.mapy),
+            parseFloat(firstPlace.mapx)
           );
-          
-          // 지도 중심을 첫 번째 장소로 이동
-          this.map.setCenter(latLng);
 
-          // 줌 레벨을 설정
+          this.map.setCenter(latLng);
           this.map.setZoom(17);
         }
       } catch (error) {
