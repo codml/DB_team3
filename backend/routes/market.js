@@ -15,7 +15,7 @@ var writepostController = require('../controllers/writepostController');
 var viewpostController = require("../controllers/viewpostController");
 var updatepostController = require("../controllers/updatepostController");
 const deletepostController = require("../controllers/deletepostController");
-var userLocationController = require('../controllers/userLocationController');
+var mapController = require('../controllers/mapController');
 
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
@@ -27,6 +27,8 @@ router.post('/writepost', upload.single('Image'), writepostController.writePost)
 router.get("/viewpost/", viewpostController.getPost);
 router.put('/updatepost', upload.single('Image'), updatepostController.updatePost);
 router.delete('/deletepost', deletepostController.deletePost);
-router.post('/userLocation', userLocationController.getLocation);
+router.post('/map', mapController.getUserLocation);
+router.get('/map', mapController.getItemLocations);
+router.post('/map/search', mapController.searchLocation);
 
 module.exports = router;
