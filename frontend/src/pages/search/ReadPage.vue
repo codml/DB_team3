@@ -140,9 +140,69 @@
 
     <!-- 내용 -->
     <section class="product-description">
-      <h2>상품 내용</h2>
-      <p>{{ product.Content }}</p>
-    </section>
+        <h2>상품 내용</h2>
+        <p>{{ product.Content }}</p>
+      </section>
+      <section class="qna-section">
+        <h2>질문 및 답변</h2>
+        <div
+          v-for="(item) in qna"
+          :key="item.QuesNo"
+          class="qna-item"
+          @click="toggleAnswerInput(item.QuesNo)"
+        >
+          <!-- 질문 -->
+          <div v-if="item.Q_private === 1 && !(userID === item.Uid || product.Uid === userID)">
+            <span class="lock-icon">🔒</span> 비밀 질문입니다.
+          </div>
+          <div v-else>
+            <p class="question">
+              <strong>작성자: </strong> {{ item.Username }}
+              <span class="q-content"><strong>Q:</strong> {{ item.Question }}</span>
+              <span class="q-date">({{ formatDate(item.Q_date) }})</span>
+            </p>
+          </div>
+          <!-- 답변 -->
+          <div v-if="item.A_private === 1 && !(userID === item.Uid || product.Uid === userID)">
+            <span class="lock-icon">🔒</span> 비밀 답변입니다.
+          </div>
+          <div v-else>
+            <p v-if="item.Answer" class="answer">
+              <strong>ㄴ A:</strong> {{ item.Answer }}
+              <span class="a-date">({{ formatDate(item.A_date) }})</span>
+            </p>
+            <!-- 답변 입력 섹션 -->
+            <div v-else-if="userID === product.Uid">
+              <div
+                v-if="selectedQuestionIndex === item.QuesNo"
+                class="answer-input"
+                @click.stop
+              >
+                <textarea
+                  v-model="newAnswer"
+                  placeholder="답변을 작성해주세요."
+                  class="answer-textarea"
+                ></textarea>
+                <button @click.stop="submitAnswer(item.QuesNo)" class="submit-answer-button">
+                  답변 저장
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 질문 작성 섹션 -->
+        <div v-if="userID !== product.Uid" class="add-question">
+          <textarea
+            v-model="newQuestion"
+            placeholder="질문을 작성해주세요."
+            class="question-textarea"
+          ></textarea>
+          <button @click="submitQuestion" class="submit-question-button">
+            질문 등록
+          </button>
+        </div>
+      </section>
 
     <!-- 삭제 버튼 -->
     <div class="action-buttons-container">
@@ -176,6 +236,7 @@ export default {
   data() {
     return {
       product: {},
+      qna: {},
       userID: "",
       auth: "",
       reportContent: "",
@@ -183,25 +244,35 @@ export default {
       currentImageIndex: 0,
       ReviewContent: "", // 후기 내용
       Ratings: 0, // 별점 (1~5 정수 값)
-      ReviewReg_date: ""
+      ReviewReg_date: "",
+      selectedQuestionIndex: null, // 현재 선택된 질문 인덱스
+      newAnswer: "", // 새로 입력하는 답변 내용
+      newQuestion: "", // 새로 입력하는 질문 내용
     };
   },
   methods: {
     async fetchProductDetails() {
       try {
-        const response = await axios.get(`http://localhost:3000/read/${this.ino}`);
-        if (response.data) {
+        const response1 = await axios.get(`http://localhost:3000/read/${this.ino}`);
+        if (response1.data) {
           const token = localStorage.getItem("token");
           const user = jwtDecode(token);
           this.userID = user.userID;
           this.auth = user.auth;
-          this.product = response.data[0];
+          this.product = response1.data[0];
 
           this.imageSources = [
             this.product.Image,
             this.product.Subimg1,
             this.product.Subimg2,
           ].filter((img) => img);
+        } else {
+          console.error("상품 데이터를 가져오지 못했습니다.");
+        }
+        const response2 = await axios.get(`http://localhost:3000/readQnA/${this.ino}`);
+        if (response2.data) {
+          this.qna = response2.data;
+          console.log(this.qna);
         } else {
           console.error("상품 데이터를 가져오지 못했습니다.");
         }
@@ -312,6 +383,63 @@ export default {
         }
       } catch (error) {
         console.error("후기 저장 중 오류 발생:", error);
+      }
+    },
+    toggleAnswerInput(QuesNo) {
+      if (this.selectedQuestionIndex === QuesNo) {
+        this.selectedQuestionIndex = null; // 이미 열려있으면 닫기
+      } else {
+        this.selectedQuestionIndex = QuesNo; // 선택된 질문 열기
+      }
+    },
+    async submitAnswer() {
+      if (!this.newAnswer.trim()) {
+        alert("답변 내용을 입력해주세요.");
+        return;
+      }
+
+      try {
+        const response = await axios.post(`http://localhost:3000/writeQnA/${this.ino}`, {
+          Ino: this.ino, // 상품 번호
+          Content: this.newAnswer,
+          Private: 0, // 비밀 여부 (0: 공개, 1: 비공개) - 예시로 설정
+          Q_uid: this.userID, // 질문 작성자 ID
+          Ans_Qno: this.selectedQuestionIndex,
+        });
+        this.newAnswer = "";
+        if (response.data.success) {
+          alert("답변이 등록되었습니다.");
+          window.location.reload();
+        } else {
+          console.error("답변 등록 실패:", response.data.error);
+        }
+      } catch (error) {
+        console.error("답변 등록 중 오류 발생:", error);
+      }
+    },
+    async submitQuestion() {
+      if (!this.newQuestion.trim()) {
+        alert("질문 내용을 입력해주세요.");
+        return;
+      }
+
+      try {
+        const response = await axios.post(`http://localhost:3000/writeQnA/${this.ino}`, {
+          Ino: this.ino, // 상품 번호
+          Content: this.newQuestion,
+          Private: 0, // 비밀 여부 (0: 공개, 1: 비공개) - 예시로 설정
+          Q_uid: this.userID, // 질문 작성자 ID
+          Ans_Qno: this.selectedQuestionIndex,
+        });
+        this.newQuestion = ""; // 입력 내용 초기화
+        if (response.data.success) {
+          alert("질문이 등록되었습니다.");
+          window.location.reload();
+        } else {
+          console.error("질문 등록 실패:", response.data.error);
+        }
+      } catch (error) {
+        console.error("질문 등록 중 오류 발생:", error);
       }
     },
   },
@@ -557,5 +685,113 @@ export default {
   margin: 0;
   font-size: 16px;
   color: #333;
+}
+
+.qna-section {
+  margin-top: 30px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.qna-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  cursor: pointer; /* 클릭 가능하도록 변경 */
+  border: 1px solid transparent; /* 기본 상태에서 투명한 테두리 */
+  border-radius: 5px;
+}
+
+.qna-item:hover {
+  border-color: #3498db; /* 호버 시 테두리 색 변경 */
+  background-color: #f1f8ff; /* 호버 시 배경 색상 변경 */
+}
+
+.answer-input {
+  margin-top: 10px;
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.question {
+  font-size: 16px;
+  color: #333;
+  margin: 5px 0;
+  align-items: center; /* 자물쇠와 텍스트 정렬 */
+}
+
+.answer {
+  font-size: 16px;
+  color: #555;
+  margin-left: 15px;
+  background-color: #f1f8ff;
+  border-left: 3px solid #3498db;
+  padding-left: 10px;
+  border-radius: 5px;
+  align-items: center; /* 자물쇠와 텍스트 정렬 */
+}
+
+.q-date,
+.a-date {
+  font-size: 12px;
+  color: #888;
+  margin-left: 20px;
+}
+
+.q-content {
+  margin-left: 20px;
+}
+
+.add-question {
+  margin-top: 20px;
+  background: #f9f9f9;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.question-textarea,
+.answer-textarea {
+  width: 90%;
+  height: 80px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.submit-question-button,
+.submit-answer-button {
+  margin-top: 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.submit-question-button:hover,
+.submit-answer-button:hover {
+  background-color: #2980b9;
+}
+
+.answer-button {
+  margin-top: 5px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.answer-button:hover {
+  background-color: #1e8449;
 }
 </style>

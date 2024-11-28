@@ -30,6 +30,8 @@ router.put('/update/:Ino', updateController.updateItem);
 router.post('/hit/:Ino', readController.hitItem);
 router.post('/report/:Ino', readController.reportItem);
 router.post('/review/:Ino', readController.reviewItem);
+router.get('/readQnA/:Ino', readController.readQnA);
+router.post('/writeQnA/:Ino', readController.writeQnA);
 router.get('/boardpage', boardpageController.getBoardPosts);
 router.post('/writepost', upload.single('Image'), writepostController.writePost);
 router.get("/viewpost/", viewpostController.getPost);
