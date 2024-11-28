@@ -10,7 +10,7 @@ exports.loginUser = (req, res) => {
     userModel.loginUser(req.body, (status, user) => { // 콜백이 상태와 사용자 데이터를 반환
         if (status === 'success') {
             const token = jwt.sign(
-                { userID: user.Id, userPwd: user.Passwd, auth: user.Auth },
+                { userID: user.Id, userPwd: user.Passwd, auth: user.Auth, UserAddress: user.Address },
                 KEY,
                 //  유효기간 : 무제한
             );

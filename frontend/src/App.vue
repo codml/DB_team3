@@ -86,7 +86,7 @@ div.account {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;  /* 오른쪽 정렬 */
-  margin-right: 300px;  /* 오른쪽 여백 */
+  margin-right: 18%;  /* 오른쪽 여백 */
   align-items: center;  /* 세로 가운데 정렬 */
 }
 

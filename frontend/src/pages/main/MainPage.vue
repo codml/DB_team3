@@ -21,6 +21,9 @@
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 
+let initLocation = null;
+let X = 0, Y = 0;
+
 const NAVER_CLIENT_ID = process.env.VUE_APP_NAVER_CLIENT_ID;
 
 // selint error 해결
@@ -48,41 +51,42 @@ export default {
   methods: {
     // 지도 초기화
     async initMap() {
-      let initLocation = null;
-      let x = 0, y = 0;
-
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          x = 37.619897;
-          y = 127.059542;
-          initLocation = { x, y };
+          X = 37.619897;
+          Y = 127.059542;
+          initLocation = { X, Y };
         } else {
           const decoded = jwtDecode(token);
-          const response = await axios.get('http://localhost:3000/userLocation', {
-            params: { user: decoded.userID },
+          console.log(decoded)
+
+          const userLocation = decoded.UserAddress;
+          console.log(userLocation);
+
+          const location = await axios.post('http://localhost:3000/userLocation', {
+            query: userLocation
           });
-          const userLocation = response.data;
-          console.log(response.data.userLocation)
-          this.searchQuery = userLocation;
-          x = userLocation.X;
-          y = userLocation.Y;
-          initLocation = { x, y };
+
+          console.log(location);
+
+          const { x, y } = location.data.location[0];
+          initLocation = { X: parseFloat(y), Y: parseFloat(x) }; // x: 경도, y: 위도
         }
       } catch (error) {
         console.error('위치 정보를 로드하는 중 오류 발생:', error.message);
         // 기본 위치 설정 (광운대학교)
-        initLocation = { x: 37.619897, y: 127.059542 };
+        initLocation = { X: 37.619897, Y: 127.059542 };
       }
 
       if (typeof naver !== 'undefined') {
         this.map = new naver.maps.Map('map', {
-          center: new naver.maps.LatLng(initLocation.x, initLocation.y),
+          center: new naver.maps.LatLng(initLocation.X, initLocation.Y),
           zoom: 10,
         });
 
         const marker = new naver.maps.Marker({
-          position: new naver.maps.LatLng(initLocation.x, initLocation.y),
+          position: new naver.maps.LatLng(initLocation.X, initLocation.Y),
           map: this.map,
         });
 
@@ -99,41 +103,37 @@ export default {
       if (!this.searchQuery.trim()) return alert('검색어를 입력하세요.');
 
       try {
-        const response = await axios.post('http://localhost:3000/map', {
+        const location = await axios.post('http://localhost:3000/userLocation', {
           query: this.searchQuery.trim(),
         });
 
-        const places = response.data.items;
+        console.log(location);
+
+        const { x, y } = location.data.location[0];
+        initLocation = { X: parseFloat(y), Y: parseFloat(x) }; // x: 경도, y: 위도
 
         // 이전 마커 제거
         this.clearMarkers();
 
         // 마커 추가
-        places.forEach((place) => {
-          const marker = new naver.maps.Marker({
-            position: new naver.maps.LatLng(
-              parseFloat(place.mapy),
-              parseFloat(place.mapx)
-            ),
-            map: this.map,
-            title: place.title.replace(/<[^>]+>/g, ''), // 태그 제거
-          });
-
-          // 마커 클릭 이벤트
-          naver.maps.Event.addListener(marker, 'click', () => {
-            alert(`${place.title.replace(/<[^>]+>/g, '')}\n주소: ${place.address}`);
-          });
-
-          this.markers.push(marker);
+        const marker = new naver.maps.Marker({
+        position: new naver.maps.LatLng(initLocation.X, initLocation.Y),
+        map: this.map,
+        //title: place.title.replace(/<[^>]+>/g, ''), // 태그 제거
         });
 
+        /*
+        // 마커 클릭 이벤트
+        naver.maps.Event.addListener(marker, 'click', () => {
+          alert(`${place.title.replace(/<[^>]+>/g, '')}\n주소: ${place.address}`);
+        });
+        */
+
+        this.markers.push(marker);
+
         // 지도 중심을 첫 번째 검색 결과로 이동하고 줌 레벨 설정
-        if (places.length > 0) {
-          const firstPlace = places[0];
-          const latLng = new naver.maps.LatLng(
-            parseFloat(firstPlace.mapy),
-            parseFloat(firstPlace.mapx)
-          );
+        if (location) {
+          const latLng = new naver.maps.LatLng(initLocation.X, initLocation.Y);
 
           this.map.setCenter(latLng);
           this.map.setZoom(17);
