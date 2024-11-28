@@ -12,7 +12,7 @@ var loginController = require('../controllers/loginController');
 //  마이페이지 컨트롤러
 var mypageController = require('../controllers/mypageController');
 
-//  상품 검색 - 상품 상세 정보 페이지 컨트롤러
+//  상품 검색 페이지 + 상품 상세 정보 페이지 컨트롤러
 var readController = require('../controllers/readController');
 var requestController = require("../controllers/requestController");
 
@@ -47,7 +47,7 @@ router.post('/write', writeController.insertItems);
 router.get('/search', searchController.searchItems);
 router.put('/update/:Ino', updateController.updateItem);
 
-/  상품 검색
+//  상품 검색
 router.get('/read/:Ino', readController.readItem);
 router.get('/delete/:Ino', readController.deleteItem);
 router.post('/hit/:Ino', readController.hitItem);
