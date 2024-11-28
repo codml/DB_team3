@@ -18,6 +18,7 @@ var viewpostController = require("../controllers/viewpostController");
 var updatepostController = require("../controllers/updatepostController");
 var deletepostController = require("../controllers/deletepostController");
 var pricecheckController = require("../controllers/pricecheckController");
+var requestController = require("../controllers/requestController");
 
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
@@ -32,6 +33,10 @@ router.get('/delete/:Ino', readController.deleteItem);
 router.put('/update/:Ino', updateController.updateItem);
 router.post('/hit/:Ino', readController.hitItem);
 router.post('/report/:Ino', readController.reportItem);
+router.get('/request/:Ino', requestController.getrequest);
+router.delete('/request/:Ino/:R_uid', requestController.deleterequest);
+router.post('/request/:Ino', requestController.sendrequest);
+router.put('/request/:Ino/:B_uid', requestController.acceptrequest);
 router.post('/review/:Ino', readController.reviewItem);
 router.get('/boardpage', boardpageController.getBoardPosts);
 router.post('/writepost', upload.single('Image'), writepostController.writePost);
