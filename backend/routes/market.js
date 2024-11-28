@@ -42,28 +42,32 @@ router.post('/mypage', upload.single("Profile_image"), mypageController.modifyUs
 router.get('/mypage/sale', mypageController.getSaleItems);
 router.get('/mypage/purchase', mypageController.getPurchaseItems);
 
-//  상품 등록
+//  상품 등록 및 수정
 router.post('/write', writeController.insertItems);
-router.get('/search', searchController.searchItems);
 router.put('/update/:Ino', updateController.updateItem);
 
-//  상품 검색
+//  상품 검색 및 삭제
+router.get('/search', searchController.searchItems);
 router.get('/read/:Ino', readController.readItem);
 router.get('/delete/:Ino', readController.deleteItem);
+
+// 상품 상세 기능 - 좋아요, 신고, 질문/답변
 router.post('/hit/:Ino', readController.hitItem);
 router.post('/report/:Ino', readController.reportItem);
-router.post('/review/:Ino', readController.reviewItem);
+router.get('/readQnA/:Ino', readController.readQnA);
+router.post('/writeQnA/:Ino', readController.writeQnA);
+router.delete('/deleteQnA/:Qno', readController.deleteQnA);
 
-//  상품 검색 - 상품 상세 정보
+//  상품 상세 기능 - 구매 요청 및 후기
 router.get('/request/:Ino', requestController.getrequest);
 router.delete('/request/:Ino/:R_uid', requestController.deleterequest);
 router.post('/request/:Ino', requestController.sendrequest);
 router.put('/request/:Ino/:B_uid', requestController.acceptrequest);
+router.post('/review/:Ino', readController.reviewItem);
+
 
 //  시세 조회
 router.get('/price', pricecheckController.priceCheck);
-
-//  자유 게시판
 router.get('/boardpage', boardpageController.getBoardPosts);
 router.post('/writepost', upload.single('Image'), writepostController.writePost);
 router.get("/viewpost/", viewpostController.getPost);

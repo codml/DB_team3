@@ -91,3 +91,51 @@ exports.reviewItem = (req, res) => {
             res.json({success: true});
     });
 };
+
+exports.readQnA = (req, res) => {
+    var Ino = req.params.Ino;
+    console.log(Ino);
+
+    // readModel 호출
+    readModel.readQnA(Ino, (err, rows) => {
+        if (err) {
+            console.error("query error");
+            res.status(500).json({ error: "Query execution failed." });
+        }
+        else {
+            console.log("검색 결과:", JSON.stringify(rows));
+            res.json(rows); // 수정된 데이터 전송
+        }
+    });
+};
+
+exports.writeQnA = (req, res) => {
+    var Ino = req.params.Ino;
+    console.log(Ino);
+
+    // readModel 호출
+    readModel.writeQnA(Ino, req.body, (err) => {
+        if (err) {
+            console.error("query error");
+            res.status(500).json({ error: "Query execution failed." });
+        }
+        else
+            res.json({success: true});
+    });
+};
+
+exports.deleteQnA = (req, res) => {
+    var Qno = req.params.Qno;
+    console.log(Qno);
+
+    // readModel 호출
+    readModel.deleteQnA(Qno, (err) => {
+        if (err) {
+            console.error("query error");
+            res.status(500).json({ error: "Query execution failed." });
+        }
+        else {
+            res.json({success: true}); // 결과 전송
+        }
+    });
+};
