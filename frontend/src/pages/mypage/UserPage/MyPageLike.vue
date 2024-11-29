@@ -7,7 +7,7 @@
             <!-- 마이페이지 메뉴 -->
             <aside class="sidebar">
                 <ul>
-                    <li @click="$router.push('/mypage/edit')">나의 정보 보기</li>
+                    <li @click="$router.push('/mypage')">나의 정보 보기</li>
                     <li @click="$router.push('/mypage/sale')">나의 판매 내역</li>
                     <li @click="$router.push('/mypage/purchase')">나의 구매 내역</li>
                     <li @click="$router.push('/mypage/like')">내가 찜한 상품</li>
@@ -24,7 +24,7 @@
                 </section>
 
                 <section class="my-products">
-                    <h2>내가 구매한 상품</h2>
+                    <h2>내가 찜한 상품</h2>
 					<!-- Table for posts -->
 					<table class="item-table">
 						<thead>
