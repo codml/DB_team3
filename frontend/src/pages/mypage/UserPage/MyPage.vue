@@ -11,6 +11,7 @@
 			<li @click="$router.push('/mypage/sale')">나의 판매 내역</li>
 			<li @click="$router.push('/mypage/purchase')">나의 구매 내역</li>
 			<li @click="$router.push('/mypage/like')">내가 찜한 상품</li>
+			<li v-if="user.Auth" @click="$router.push('/mypage/manage')">사용자 관리</li>
 			</ul>
 		</aside>
 

@@ -48,6 +48,11 @@ const routes = [
     component: () => import('../pages/mypage/UserPage/MyPageLike.vue')
   },
   {
+    path: '/mypage/manage',
+    name: 'manage',
+    component: () => import('../pages/mypage/AdminPage/AdminPage.vue')
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../pages/login/LoginPage.vue')
