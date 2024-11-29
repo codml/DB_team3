@@ -366,6 +366,7 @@ export default {
 
 .search-container {
   text-align: center; /* 검색 입력창을 중앙 정렬 */
+  margin-top: 50px;
   margin-bottom: 5px; /* 검색창과 지도 사이 간격 */
 }
 
