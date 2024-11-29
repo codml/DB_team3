@@ -42,9 +42,14 @@ router.post('/login', loginController.loginUser);
 
 //  마이페이지
 router.get('/mypage', mypageController.getUserInformation);
+//	마이페이지 수정
 router.post('/mypage', upload.single("Profile_image"), mypageController.modifyUserInformation);
+//	판매목록
 router.get('/mypage/sale', mypageController.getSaleItems);
+//	구매목록
 router.get('/mypage/purchase', mypageController.getPurchaseItems);
+//	찜목록
+router.get('/mypage/like', mypageController.getLikeItems);
 
 //  지도 API - 회원 주변의 상품 검색
 router.post('/map', mapController.getUserLocation);
