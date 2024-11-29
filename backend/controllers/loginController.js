@@ -5,14 +5,14 @@ var dotenv = require('dotenv');
 dotenv.config();
 const KEY = process.env.SECRET_KEY;
 
-exports.loginUser = (req, res, next) => {
+exports.loginUser = (req, res) => {
     console.log("req: " + JSON.stringify(req.body));
     userModel.loginUser(req.body, (status, user) => { // 콜백이 상태와 사용자 데이터를 반환
         if (status === 'success') {
             const token = jwt.sign(
-                { userID: user.Id, userPwd: user.Passwd, auth: user.Auth },
+                { userID: user.Id, userPwd: user.Passwd, auth: user.Auth, UserAddress: user.Address },
                 KEY,
-                { expiresIn: '3h' }
+                //  유효기간 : 무제한
             );
 
             res.json({ message: 'success', token: token }); // 사용자 정보를 반환

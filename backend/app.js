@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 var marketRouters = require('./routes/market');
 
@@ -16,9 +17,12 @@ app.set('view engine', 'ejs');
 app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// 미들웨어 설정
+app.use(bodyParser.json()); // JSON 요청 본문 처리
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/', marketRouters);
 
