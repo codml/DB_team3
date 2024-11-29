@@ -170,6 +170,8 @@ export default {
         .then(() => {
           alert('등록 성공!');
           this.resetForm();
+          // 등록 성공 후 상품 검색 페이지로 리다이렉트
+          this.$router.push({ name: 'search' });
         })
         .catch(error => {
           alert('등록 실패. 다시 시도해주세요.');
