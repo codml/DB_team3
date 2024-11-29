@@ -39,9 +39,13 @@ const routes = [
     component: () => import('../pages/mypage/UserPage/MyPagePurchase.vue')
   },
   {
-    path: '/mypage/likelist',
+    path: '/mypage/like',
+    redirect: '/mypage/like/page_1', // 기본 경로를 page_1로 설정
+  },
+  {
+    path: '/mypage/like/page_:page',
     name: 'mylike',
-    component: () => import('../pages/mypage/UserPage/MyPageEdit.vue')
+    component: () => import('../pages/mypage/UserPage/MyPageLike.vue')
   },
   {
     path: '/login',

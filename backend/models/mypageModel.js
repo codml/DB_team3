@@ -53,7 +53,7 @@ exports.modifyUser = (userData, callback) => {
 
 exports.getSaleItems = (userID, callback) => {
 	console.log('Call getSaleItems');
-	var sql = 'SELECT * FROM item_datas WHERE Uid = ?;';
+	var sql = 'SELECT * FROM item_datas WHERE Uid = ? ORDER BY Reg_date DESC;';
 	connection.query(sql, userID, (err, rows) => {
 		if (err) {
             console.error("DB 오류");
@@ -73,7 +73,7 @@ exports.getSaleItems = (userID, callback) => {
 
 exports.getPurchaseItems = (userID, callback) => {
 	console.log('Call getPurchaseItems');
-	var sql = 'SELECT * FROM item_datas WHERE B_uid = ? ORDER BY Reg_date;';
+	var sql = 'SELECT * FROM item_datas WHERE B_uid = ? ORDER BY Reg_date DESC;';
 	connection.query(sql, userID, (err, rows) => {
 		if (err) {
             console.error("DB 오류" + err.sqlMessage);
@@ -83,6 +83,32 @@ exports.getPurchaseItems = (userID, callback) => {
 
         if (rows.length === 0) {
             console.log("구매상품이 존재하지 않음");
+            callback('Item not exists');
+            return;
+        }
+		callback('success', rows); // 성공 시 사용자 데이터 반환
+	  });
+};
+
+
+exports.getLikeItems = (userID, callback) => {
+	console.log('Call getLikeItems');
+	var sql = 'SELECT * \
+				FROM item_datas \
+				WHERE Ino IN ( \
+					SELECT Ino \
+					FROM user_like_items \
+					WHERE Uid = ?) \
+				ORDER BY Reg_date DESC;';
+	connection.query(sql, userID, (err, rows) => {
+		if (err) {
+            console.error("DB 오류" + err.sqlMessage);
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("찜한상품이 존재하지 않음");
             callback('Item not exists');
             return;
         }

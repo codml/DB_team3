@@ -24,7 +24,7 @@
                 </section>
 
                 <section class="my-products">
-                    <h2>내가 구매한 상품</h2>
+                    <h2>내가 찜한 상품</h2>
 					<!-- Table for posts -->
 					<table class="item-table">
 						<thead>
@@ -40,7 +40,7 @@
 								<td class="item-image">
 									<img src="https://i.namu.wiki/i/88Te46HNfgOSkt09UwDFqKXvmL2K80dInPzMhlgtvya6_l_H2NkdBxBiY_-1efoVmSADAH9v5oiR0B4jVMGwMw.webp" alt="Example Image">
 								</td>
-								<td class="item-title">구매상품이</td>
+								<td class="item-title">찜상품이</td>
 								<td class="item-price">존재하지</td>
 								<td class="post-time">않습니다</td>
 							</tr>
@@ -58,6 +58,7 @@
 								</td>
 								<td class="item-title">
 									<a href="#">
+										<span v-if="item.B_uid !== null" class="notice-badge">판매완료</span>
 										{{ item.Title }}
 									</a>
 								</td>
@@ -111,7 +112,7 @@ export default {
 		// Axios GET 요청
 		const token = localStorage.getItem('token'); // 토큰을 로컬 스토리지에서 가져오기
 
-		axios.get('http://localhost:3000/mypage/purchase', {
+		axios.get('http://localhost:3000/mypage/like', {
 			headers: {
 				Authorization: `Bearer ${token}` // 인증 헤더 설정
 			}
@@ -139,13 +140,21 @@ export default {
 		currentPage() {
 			return parseInt(this.page) || 1;
 		},
+		sortedPosts() {
+			return [...this.items].sort((a, b) => {
+				// Notice 값을 숫자로 비교
+				if (a.B_uid !== null && b.B_uid === null) return 1;
+				if (a.B_uid === null && b.B_uid !== null) return -1;
+				return new Date(b.Reg_date) - new Date(a.Reg_date);
+			});
+		},
 		totalPages() {
-			return Math.ceil(this.items.length / this.itemsPerPage) || 1;
+			return Math.ceil(this.sortedPosts.length / this.itemsPerPage) || 1;
 		},
 		paginatedPosts() {
 			const start = (this.currentPage - 1) * this.itemsPerPage;
 			const end = start + this.itemsPerPage;
-			return this.items.slice(start, end);
+			return this.sortedPosts.slice(start, end);
 		},
 	},
 
@@ -163,7 +172,7 @@ export default {
 		nextPage() {
 			if (this.currentPage < this.totalPages) {
 				this.$router.push({
-					name: "mypurchase",
+					name: "mylike",
 					params: { page: this.currentPage + 1 },
 				});
 			}
@@ -171,7 +180,7 @@ export default {
 		prevPage() {
 			if (this.currentPage > 1) {
 				this.$router.push({
-					name: "mypurchase",
+					name: "mylike",
 					params: { page: this.currentPage - 1 },
 				});
 			}

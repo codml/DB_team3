@@ -7,10 +7,10 @@
             <!-- 마이페이지 메뉴 -->
             <aside class="sidebar">
                 <ul>
-                    <li @click="$router.push('/mypage/edit')">나의 정보 보기</li>
+                    <li @click="$router.push('/mypage')">나의 정보 보기</li>
                     <li @click="$router.push('/mypage/sale')">나의 판매 내역</li>
                     <li @click="$router.push('/mypage/purchase')">나의 구매 내역</li>
-                    <li @click="$router.push('/mypage/likelist')">내가 찜한 상품</li>
+                    <li @click="$router.push('/mypage/like')">내가 찜한 상품</li>
                 </ul>
             </aside>
 
@@ -48,6 +48,7 @@
 								v-for="(item, index) in paginatedPosts"
 								:key="index"
 								:class="{ notice: item.B_uid !== null }"
+								@click.prevent="goToViewPost(item)"
 							>
 								<td class="item-image">
 									<img 
@@ -56,7 +57,7 @@
 									/>
 								</td>
 								<td class="item-title">
-									<a href="#" @click.prevent="goToViewPost(item)">
+									<a href="#">
 										<span v-if="item.B_uid !== null" class="notice-badge">판매완료</span>
 										{{ item.Title }}
 									</a>
@@ -142,8 +143,8 @@ export default {
 		sortedPosts() {
 			return [...this.items].sort((a, b) => {
 				// Notice 값을 숫자로 비교
-				if (a.B_uid !== null && b.B_uid === null) return -1;
-				if (a.B_uid === null && b.B_uid !== null) return 1;
+				if (a.B_uid !== null && b.B_uid === null) return 1;
+				if (a.B_uid === null && b.B_uid !== null) return -1;
 				return new Date(b.Reg_date) - new Date(a.Reg_date);
 			});
 		},
