@@ -115,3 +115,23 @@ exports.getLikeItems = (userID, callback) => {
 		callback('success', rows); // 성공 시 사용자 데이터 반환
 	  });
 };
+
+
+exports.getReportList = (callback) => {
+	console.log('Call getReportList');
+	var sql = '';
+	connection.query(sql, (err, rows) => {
+		if (err) {
+            console.error("DB 오류 " + err.sqlMessage);
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("찜한상품이 존재하지 않음");
+            callback('Item not exists');
+            return;
+        }
+		callback('success', rows); // 성공 시 사용자 데이터 반환
+	  });
+};
