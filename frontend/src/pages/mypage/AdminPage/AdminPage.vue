@@ -17,20 +17,33 @@
             <!-- 프로필과 내가 판매한 상품을 상하로 배치 -->
             <div class="profile-and-products">
 				<!-- 사용자 상세정보 -->
-                <section class="profile" v-if="detail">
-                    <h2>사용자 프로필</h2>
-                    <div class="profile-box">
-                        사용자 프로필
-                    </div>
-                </section>
-
-                <section class="my-products">
+                <section class="my-products" >
                     <h2>신고 당한 사용자</h2>
 					<!-- Table for posts -->
-					<section class="profile">
-						<h2>사용자 프로필 수정</h2>
-						<div class="profile-box">
-							사용자 프로필
+					<section class="profile" v-if="detail">
+						<div class="cancelBtn">
+							<button class="btn" @click="detail=false">X</button>
+						</div>
+						<div class="detail">
+							<div class="profile-image">
+								<img 
+									v-if="user.Profile_image" 
+									:src="`data:image/jpeg;base64,${user.Profile_image}`" 
+									alt="Image from server"
+								/>
+							</div>
+							<div class="profile-box">
+								<!-- 사용자 추가 정보 -->
+								<p><strong>아이디:</strong> {{ user.Id || '정보 없음' }}</p>
+								<p><strong>비밀번호:</strong> {{ user.Passwd || '정보 없음' }}</p>
+								<p><strong>이름:</strong> {{ user.Uname || '정보 없음' }}</p>
+								<p><strong>닉네임:</strong> {{ user.Nickname || '정보 없음' }}</p>
+								<p><strong>나이:</strong> {{ user.Age || '정보 없음' }}</p>
+								<p><strong>성별:</strong> {{ user.Sex || '정보 없음' }}</p>
+								<p><strong>전화번호:</strong> {{ user.Phone || '정보 없음' }}</p>
+								<p><strong>이메일:</strong> {{ user.Email || '정보 없음' }}</p>
+								<p><strong>주소:</strong> {{ user.Address || '정보 없음' }}</p>
+							</div>
 						</div>
 					</section>
 					<table class="item-table">
@@ -42,7 +55,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-if="!items">
+							<tr v-if="!reports">
 								<td class="item-title">신고가</td>
 								<td class="item-price">존재하지</td>
 								<td class="post-time">않습니다</td>
@@ -51,7 +64,7 @@
 								v-for="(report, index) in paginatedPosts"
 								:key="index"
 								:class="{ notice: report.Id !== null }" 
-								@click="detail = true"
+								@click="getRpUser(report.Id)"
 							>
 								<td class="item-title">
 									<a href="#">
@@ -97,6 +110,7 @@ export default {
 		return {
 			// 사용자 데이터 저장
 			reports: [],
+			user: [],
 			itemsPerPage: 5, // 페이지당 항목 수
 
 			detail: false,		// 사용자 상세정보
@@ -115,7 +129,7 @@ export default {
 			}
 		})
 		.then(response => {
-			this.items = response.data.reports; // 응답 데이터에서 사용자 정보 저장
+			this.reports = response.data.reports; // 응답 데이터에서 사용자 정보 저장
 			console.log('reports: '+ JSON.stringify(this.reports));
 		})
 		.catch(err => {
@@ -174,12 +188,31 @@ export default {
 				});
 			}
 		},
-		goToViewPost(item) {
-			this.$router.push({
-				name: "read",
-				params: { ino: item.Ino }
-			});
-		},
+
+		getRpUser(Id) {			
+			axios.get('http://localhost:3000/mypage/manage/detail', {
+				headers: {
+					Id: Id // 인증 헤더 설정
+				}
+			})
+			.then(response => {
+				this.user = response.data.user; // 응답 데이터에서 사용자 정보 저장
+				console.log('user: '+ JSON.stringify(this.user));
+			})
+			.catch(err => {
+				console.error('Error fetching MyPage data:', err);
+				if(err.response.data.message === 'Item not exists')
+					this.error = null;
+				else if (err.response && err.response.data) {
+					this.error = err.response.data.message || 'Failed to load data';
+				} else {
+					this.error = 'An unexpected error occurred';
+				}
+			})
+			.finally(() => {
+				this.detail = true;
+			})
+		}
 	}
 };
 </script>
@@ -238,13 +271,30 @@ export default {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.profile h2 {
-    font-size: 18px;
-    margin-bottom: 10px;
+.cancelBtn {
+  display: flex; /* Flexbox 활성화 */
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  padding: 20px; /* 선택적으로 여백 추가 */
+}
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+.detail {
+	display: flex; /* Flexbox를 활성화 */
+	gap: 10px;     /* 두 요소 간의 간격 설정 (선택 사항) */
+}
+
+.profile-image {
+	display: flex; /* Flexbox 활성화 */
+	width: 300px;
+	align-items: center; /* 세로 중앙 정렬 */
+	justify-content: center; /* 가로 중앙 정렬 (선택 사항) */
 }
 
 .profile-box {
-    text-align: center;
+    text-align: left;
     font-size: 16px;
     color: #666;
 }
@@ -284,7 +334,7 @@ export default {
 }
 
 .item-table td.item-title {
-  text-align: left;
+  text-align: center;
 }
 
 .item-table td.item-price {

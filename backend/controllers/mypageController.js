@@ -192,3 +192,20 @@ exports.getReportList = (req, res, next) => {
 	});
 };
 
+// 신고 당한 유저 정보 가져오기
+exports.getRpUser = (req, res, next) => {
+	console.log('Call getRpUser');
+	
+	const userId = req.headers.id;
+	console.log('userId: ' + userId);
+	mypageModel.getRpUser(userId, (status, user) => {
+		if(status === 'success'){
+			if(user.Profile_image)
+				user.Profile_image = Buffer.from(user.Profile_image).toString('base64')
+			return res.status(200).json({ message: 'Loading user information success', user: user });
+		}
+		else
+			return res.status(401).json({ message: status });
+	});
+};
+
