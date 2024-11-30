@@ -4,46 +4,47 @@
 	<div v-else id="app">
 		<!-- 메인 섹션 -->
 		<main class="main-content">
-		<!-- 마이페이지 메뉴 -->
-		<aside class="sidebar">
-			<ul>
-			<li @click="$router.push('/mypage/edit')">나의 정보 수정</li>
-			<li @click="$router.push('/mypage/sale')">나의 판매 내역</li>
-			<li @click="$router.push('/mypage/purchase')">나의 구매 내역</li>
-			<li @click="$router.push('/mypage/like')">내가 찜한 상품</li>
-			</ul>
-		</aside>
+			<!-- 마이페이지 메뉴 -->
+			<aside class="sidebar">
+				<ul>
+					<li @click="$router.push('/mypage/edit')">나의 정보 수정</li>
+					<li @click="$router.push('/mypage/sale')">나의 판매 내역</li>
+					<li @click="$router.push('/mypage/purchase')">나의 구매 내역</li>
+					<li @click="$router.push('/mypage/like')">내가 찜한 상품</li>
+					<li v-if="user.Auth" @click="$router.push('/mypage/manage')">사용자 관리</li>
+				</ul>
+			</aside>
 
 
-		<!-- 사용자 프로필 -->
-		<section class="profile">
-			<h2>사용자 프로필</h2>
-			<div class="profile-content">
-				<div class="profile-left">
-					<!-- 사용자 추가 정보 -->
-					<p><strong>아이디:</strong> {{ user.Id || '정보 없음' }}</p>
-					<p><strong>비밀번호:</strong> {{ user.Passwd || '정보 없음' }}</p>
-					<p><strong>이름:</strong> {{ user.Uname || '정보 없음' }}</p>
-					<p><strong>닉네임:</strong> {{ user.Nickname || '정보 없음' }}</p>
-					<p><strong>나이:</strong> {{ user.Age || '정보 없음' }}</p>
-					<p><strong>성별:</strong> {{ user.Sex || '정보 없음' }}</p>
-					<p><strong>전화번호:</strong> {{ user.Phone || '정보 없음' }}</p>
-					<p><strong>이메일:</strong> {{ user.Email || '정보 없음' }}</p>
-					<p><strong>주소:</strong> {{ user.Address || '정보 없음' }}</p>
-				</div>
-				<div class="profile-right">
-					<!-- 이미지 출력 -->
-					<div class="profile-image-wrapper">
-						<img 
-							v-if="user.Profile_image" 
-							:src="`data:image/jpeg;base64,${user.Profile_image}`" 
-							alt="Image from server"
-						/>
-						<p v-else>이미지가 없습니다</p>
+			<!-- 사용자 프로필 -->
+			<section class="profile">
+				<h2>사용자 프로필</h2>
+				<div class="profile-content">
+					<div class="profile-left">
+						<!-- 사용자 추가 정보 -->
+						<p><strong>아이디:</strong> {{ user.Id || '정보 없음' }}</p>
+						<p><strong>비밀번호:</strong> {{ user.Passwd || '정보 없음' }}</p>
+						<p><strong>이름:</strong> {{ user.Uname || '정보 없음' }}</p>
+						<p><strong>닉네임:</strong> {{ user.Nickname || '정보 없음' }}</p>
+						<p><strong>나이:</strong> {{ user.Age || '정보 없음' }}</p>
+						<p><strong>성별:</strong> {{ user.Sex || '정보 없음' }}</p>
+						<p><strong>전화번호:</strong> {{ user.Phone || '정보 없음' }}</p>
+						<p><strong>이메일:</strong> {{ user.Email || '정보 없음' }}</p>
+						<p><strong>주소:</strong> {{ user.Address || '정보 없음' }}</p>
+					</div>
+					<div class="profile-right">
+						<!-- 이미지 출력 -->
+						<div class="profile-image-wrapper">
+							<img 
+								v-if="user.Profile_image" 
+								:src="`data:image/jpeg;base64,${user.Profile_image}`" 
+								alt="Image from server"
+							/>
+							<p v-else>이미지가 없습니다</p>
+						</div>
 					</div>
 				</div>
-			</div>
-		</section>
+			</section>
 		</main>
 	</div>
 </template>

@@ -115,3 +115,53 @@ exports.getLikeItems = (userID, callback) => {
 		callback('success', rows); // 성공 시 사용자 데이터 반환
 	  });
 };
+
+
+exports.getReportList = (callback) => {
+	console.log('Call getReportList');
+	var sql = ' \
+				SELECT Id, Rp_cnt, Avg_rating \
+				FROM usr NATURAL JOIN (SELECT Uid AS Id, COUNT(*) AS Rp_cnt \
+										FROM report JOIN item_datas USING (Ino) \
+										GROUP BY Uid) AS new_report \
+				ORDER BY Rp_cnt DESC; \
+			';
+	connection.query(sql, (err, rows) => {
+		if (err) {
+            console.error("DB 오류 " + err.sqlMessage);
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("찜한상품이 존재하지 않음");
+            callback('Item not exists');
+            return;
+        }
+		callback('success', rows); // 성공 시 사용자 데이터 반환
+	  });
+};
+
+// 
+exports.getRpUser = (userId, callback) => {
+	console.log('Call getRpUser');
+	var sql = ' \
+				SELECT * \
+				FROM usr \
+				WHERE Id = ? \
+			';
+	connection.query(sql, [userId], (err, rows) => {
+		if (err) {
+            console.error("DB 오류 " + err.sqlMessage);
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("해당유저가 존재하지 않음");
+            callback('Item not exists');
+            return;
+        }
+		callback('success', rows[0]); // 성공 시 사용자 데이터 반환
+	  });
+};

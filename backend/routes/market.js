@@ -50,6 +50,10 @@ router.get('/mypage/sale', mypageController.getSaleItems);
 router.get('/mypage/purchase', mypageController.getPurchaseItems);
 //	찜목록
 router.get('/mypage/like', mypageController.getLikeItems);
+//	관리자페이지
+router.get('/mypage/manage', mypageController.getReportList);
+//	신고당한 유저 정보 가져오기
+router.get('/mypage/manage/detail', mypageController.getRpUser);
 
 //  지도 API - 회원 주변의 상품 검색
 router.post('/map', mapController.getUserLocation);
