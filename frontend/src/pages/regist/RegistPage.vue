@@ -47,7 +47,7 @@
       <label for="location">거래희망장소</label>
       <div class="location-select">
         <button type="button" @click="openAddressPopup">도로명 주소 검색</button>
-        <input type="text" id="location" placeholder="거래희망장소를 입력해주세요" v-model="location" />
+        <input type="text" id="location" placeholder="거래희망장소를 입력 또는 검색해주세요" v-model="location" />
       </div>
     </div>
 
@@ -121,6 +121,14 @@ export default {
     },
   },
   methods: {
+    openAddressPopup() {
+      new window.daum.Postcode({
+        oncomplete: (data) => {
+          // 검색 결과 처리
+          this.location = data.address; // 도로명 주소
+        },
+      }).open();
+    },
     handleFileUpload(event) {
       const files = Array.from(event.target.files);
       const validFiles = files.filter(file => file.type.startsWith('image/'));
@@ -197,6 +205,12 @@ export default {
       this.mainCategory = '';
       this.subCategory = '';
     },
+  },
+  mounted() {
+    const script = document.createElement('script');
+    script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.onload = () => console.log('Daum Postcode API loaded');
+    document.head.appendChild(script);
   },
 };
 </script>
