@@ -121,6 +121,7 @@ export default {
     },
   },
   methods: {
+    
     handleFileUpload(event) {
       const files = Array.from(event.target.files);
       const validFiles = files.filter(file => file.type.startsWith('image/'));
