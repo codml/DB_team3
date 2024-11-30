@@ -72,6 +72,13 @@ exports.getItemLocations = async (req, res) => {
                 });
             }
 
+            if(!rows) {
+                res.status(404).json({
+                    message: 'cannot find address data',
+                    error: 'No results found',
+                });
+            }
+
             const url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode";
             const headers = {
                 "X-NCP-APIGW-API-KEY-ID": NAVER_CLIENT_CLOUD_ID,
