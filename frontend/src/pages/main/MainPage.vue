@@ -154,6 +154,7 @@ export default {
     async initMap() {
       try {
         const token = localStorage.getItem('token');
+
         if (!token) {
           X = 37.619897;
           Y = 127.059542;
@@ -270,6 +271,7 @@ export default {
           return;
         }
       }
+      
       if (!this.searchQuery.trim()) return alert('검색어를 입력하세요.');
       console.log(this.searchQuery);
 
