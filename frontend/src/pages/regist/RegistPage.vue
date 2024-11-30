@@ -46,8 +46,8 @@
     <div v-if="Deal_way === 0" class="form-group row">
       <label for="location">거래희망장소</label>
       <div class="location-select">
-        <input type="text" id="location" placeholder="거래희망장소를 입력해주세요" v-model="location" />
         <button type="button" @click="openAddressPopup">도로명 주소 검색</button>
+        <input type="text" id="location" placeholder="거래희망장소를 입력 또는 검색해주세요" v-model="location" />
       </div>
     </div>
 
@@ -121,7 +121,14 @@ export default {
     },
   },
   methods: {
-    
+    openAddressPopup() {
+      new window.daum.Postcode({
+        oncomplete: (data) => {
+          // 검색 결과 처리
+          this.location = data.address; // 도로명 주소
+        },
+      }).open();
+    },
     handleFileUpload(event) {
       const files = Array.from(event.target.files);
       const validFiles = files.filter(file => file.type.startsWith('image/'));
@@ -199,6 +206,12 @@ export default {
       this.subCategory = '';
     },
   },
+  mounted() {
+    const script = document.createElement('script');
+    script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.onload = () => console.log('Daum Postcode API loaded');
+    document.head.appendChild(script);
+  },
 };
 </script>
 
@@ -252,7 +265,12 @@ textarea {
   gap: 10px;
 }
 
-.location-select,
+.location-select{
+  display: flex;
+  align-items: center;
+  width: 425px;
+}
+
 .tags-select {
   display: flex;
   align-items: center;
@@ -261,6 +279,17 @@ textarea {
 }
 
 button {
+  padding: 8px 12px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+}
+
+button.location-select {
+  width: 130px;
   padding: 8px 12px;
   border: none;
   background-color: #007bff;
