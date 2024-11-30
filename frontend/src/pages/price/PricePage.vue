@@ -3,7 +3,7 @@
     <div class="search-bar">
       <input 
         v-model="group3" 
-        placeholder="상품 소분류를 입력하세요" 
+        placeholder="상품 태그를 입력하세요" 
         @keyup.enter="fetchPriceData" 
       />
       <button @click="fetchPriceData">검색</button>
