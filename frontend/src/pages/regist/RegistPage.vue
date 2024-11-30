@@ -47,6 +47,7 @@
       <label for="location">거래희망장소</label>
       <div class="location-select">
         <input type="text" id="location" placeholder="거래희망장소를 입력해주세요" v-model="location" />
+        <button type="button" @click="openAddressPopup">도로명 주소 검색</button>
       </div>
     </div>
 
@@ -82,6 +83,9 @@
 <script>
 import axios from "axios";
 import {jwtDecode} from "jwt-decode";
+
+//const DORONAME_API_KEY = process.env.VUE_APP_DORONAME_API_KEY;
+
 export default {
   name: 'FormComponent',
   data() {
@@ -136,6 +140,7 @@ export default {
     triggerFileInput() {
       this.$refs.fileInput.click();
     },
+    
     handleFileDelete(index) {
       URL.revokeObjectURL(this.previews[index]);
       this.photos.splice(index, 1);
@@ -195,7 +200,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .form-container {
