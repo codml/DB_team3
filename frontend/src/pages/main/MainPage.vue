@@ -193,8 +193,19 @@ export default {
         alert('네이버 지도 API 로드 실패');
       }
 
-      const itemLocations = await axios.get('http://localhost:3000/map'); // 상품 거래 장소 정보 받아오기
-      console.log(itemLocations.data); // 응답 데이터를 확인
+      // 주소 데이터가 제대로 반환됬는지 확인
+      try {
+        const itemLocations = await axios.get('http://localhost:3000/map'); // 상품 거래 장소 정보 받아오기
+        console.log(itemLocations.data); // 응답 데이터를 확인
+      } catch (error) {
+          if (error.response && error.response.status === 404) {
+              console.error('Error: Resource not found (404)');
+          } else {
+              console.error('Error:', error.message);
+          }
+
+          return;
+      }
 
       for (let location of itemLocations.data.location) {
         try {
