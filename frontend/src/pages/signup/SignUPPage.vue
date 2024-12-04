@@ -28,6 +28,7 @@
       <div class="information">
          <label for="input6">주소</label><br>
          <input v-model="form.address" id="input6" name="address" type="text" required/>
+         <button id="address-search" type="button" @click="openAddressPopup">도로명 주소 검색</button>
       </div>
       <div class="information">
          <label for="input7">아이디</label><br>
@@ -35,7 +36,7 @@
       </div>
       <div class="information">
          <label for="input8">비밀번호</label><br>
-         <input v-model="form.passwd" id="input8" name="passwd" type="text" required/>
+         <input v-model="form.passwd" id="input8" name="passwd" type="password" required/>
       </div><br>
       <button id="btn_signup">회원가입</button>
     </form>
@@ -61,6 +62,14 @@ export default {
     };
   },
   methods: {
+    openAddressPopup() {
+      new window.daum.Postcode({
+        oncomplete: (data) => {
+          // 검색 결과 처리
+          this.form.address = data.address; // 도로명 주소
+        },
+      }).open();
+    },
     async handleSubmit() {
       try {
         const response = await axios.post('http://localhost:3000/signup', this.form);
@@ -83,7 +92,13 @@ export default {
 			alert('회원가입 중 오류가 발생했습니다.');
       }
     }
-  }
+  },
+  mounted() {
+    const script = document.createElement('script');
+    script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.onload = () => console.log('Daum Postcode API loaded');
+    document.head.appendChild(script);
+  },
 };
 </script>
 
@@ -130,7 +145,23 @@ export default {
     margin-right: 5px;
   }
 
-  button {
+  #address-search {
+    margin-top: 5px;
+    width: 35%;
+    padding: 10px;
+    background-color: #42b983;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #address-search:hover {
+    background-color: #369a6e;
+  }
+
+  #btn_signup {
     width: 100%;
     padding: 10px;
     background-color: #42b983;
@@ -141,7 +172,7 @@ export default {
     cursor: pointer;
   }
 
-  button:hover {
+  #btn_signup:hover {
     background-color: #369a6e;
   }
 </style>

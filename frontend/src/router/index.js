@@ -58,6 +58,16 @@ const routes = [
     component: () => import('../pages/signup/SignUPPage.vue')
   },
   {
+    path: '/account/id',
+    name: 'findID',
+    component: () => import('../pages/login/account/FindidPage.vue')
+  },
+  {
+    path: '/account/password',
+    name: 'findPW',
+    component: () => import('../pages/login/account/FindpwPage.vue')
+  },
+  {
     path: '/search',
     name: 'search',
     component: () => import('../pages/search/SearchPage.vue'),
