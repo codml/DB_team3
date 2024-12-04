@@ -9,6 +9,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 var signupController = require('../controllers/signupController');
 var loginController = require('../controllers/loginController');
 
+//  아이디, 비밀번호 찾기 컨트롤러
+var accountController = require('../controllers/accountController');
+
 //  마이페이지 컨트롤러
 var mypageController = require('../controllers/mypageController');
 
@@ -39,6 +42,10 @@ var deletepostController = require("../controllers/deletepostController");
 //  로그인, 회원가입
 router.post('/signup', signupController.insertUser);
 router.post('/login', loginController.loginUser);
+
+//  아이디, 비밀번호 찾기
+router.post('/account/id', accountController.findID);
+router.post('/account/password', accountController.findPW);
 
 //  마이페이지
 router.get('/mypage', mypageController.getUserInformation);

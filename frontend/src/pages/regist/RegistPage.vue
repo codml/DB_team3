@@ -84,8 +84,6 @@
 import axios from "axios";
 import {jwtDecode} from "jwt-decode";
 
-//const DORONAME_API_KEY = process.env.VUE_APP_DORONAME_API_KEY;
-
 export default {
   name: 'FormComponent',
   data() {

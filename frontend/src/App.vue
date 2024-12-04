@@ -38,7 +38,10 @@ import {jwtDecode} from "jwt-decode";
 export default {
   computed: {
     isAuthPage() {
-      return this.$route.path === '/login' || this.$route.path === '/signup';
+      return this.$route.path === '/login' || 
+             this.$route.path === '/signup' || 
+             this.$route.path === '/account/id'|| 
+             this.$route.path === '/account/password';
     },
     isLoggedIn() {
       const token = localStorage.getItem('token');

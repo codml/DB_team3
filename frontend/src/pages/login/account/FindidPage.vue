@@ -1,30 +1,29 @@
 <template>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-
-  <div class="login">
-    <h1>Login</h1>
-    <form @submit.prevent="handleLogin">
+  
+  <div class="findID">
+    <h1>아이디 찾기</h1>
+    <form @submit.prevent="handleFind">
       <div class="input-container">
         <span class="material-symbols-outlined icon-ID">person</span>
-        <input v-model="form.userID" id="userID" name="userID" type="text" placeholder="아이디를 입력하세요." required />
+        <input v-model="form.userName" id="userName" name="userName" type="text" placeholder="이름을 입력하세요." required />
       </div>
       <div class="input-container">
-        <input v-model="form.userPwd" id="userPwd" name="userPwd" type="password" placeholder="비밀번호를 입력하세요." required />
-        <span class="material-symbols-outlined icon-Lock">lock</span>
+        <input v-model="form.userEmail" id="userEmail" name="userEmail" type="text" placeholder="이메일을 입력하세요." required />
+        <span class="material-symbols-outlined icon-Mail">mail</span>
       </div>
       <div class="button-container">
-        <button class="fade-button" type="submit">로그인</button>
+        <button class="fade-button" type="submit">아이디 찾기</button>
       </div>
     </form>    
   </div>
   <br>
   <div class="sub-link">
+    <a href="/login" class="link">로그인</a> | 
     <a href="/signup" class="link">회원가입</a> | 
-    <a href="/account/id" class="link">아이디 찾기</a> | 
     <a href="/account/password" class="link">비밀번호 찾기</a>
   </div>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -33,41 +32,40 @@ export default {
   data() {
     return {
       form: {
-        userID: '',
-        userPwd: ''
+        userName: '',
+        userEmail: ''
       }
     };
   },
   methods: {
-    async handleLogin() {
+    async handleFind() {
       try {
-        if (this.form.userID && this.form.userPwd) {
-          console.log('로그인 시도:', this.form.userID, this.form.userPwd);
-          const response = await axios.post('http://localhost:3000/login', this.form);
+        if (this.form.userName && this.form.userEmail) {
+          console.log('아이디 찾기:', this.form.userName, this.form.userEmail);
+          const response = await axios.post('http://localhost:3000/account/id', this.form);
           console.log('서버 응답:', response.data.message);
 
           if (response.data.message === 'success') {
-            alert('성공적으로 로그인 되었습니다!');
+            alert('아이디가 회원님의 이메일로 성공적으로 전송되었습니다.\n메일을 확인해주세요.');
 
-            const token = response.data.token;
-            localStorage.setItem('token', token);
-
-            this.$router.push({ name: 'main' });
+            // 사용자에게 확인 메시지 표시
+            if (confirm('로그인 페이지로 이동하시겠습니까?')) {
+              this.$router.push({name: 'login'});  // '예' 선택 시 '/login'으로 이동
+            } else {
+              this.$router.push({name: 'main'});   // '아니오' 선택 시 '/main'으로 이동
+            }
           } 
-          else if (response.data.message === 'ID fail') {
-            alert('잘못된 아이디 입니다.');
-          } 
-          else if (response.data.message === 'PW fail') {
-            alert('잘못된 패스워드 입니다.');
+          else if (response.data.message === 'fail') {
+            alert('잘못된 회원정보 입니다.');
           }
         } 
         else {
-          alert('아이디와 비밀번호를 입력하세요.');
+          alert('이름과 이메일을 입력하세요.');
         }
       } 
       catch (error) {
         console.error('오류 발생:', error);
-        alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+        alert('회원정보 확인 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
     }
   }
@@ -76,7 +74,7 @@ export default {
 
 <style scoped>
 
-.login {
+.findID {
   margin: 100px auto 0; /* 위쪽에 100px 간격을 두고, 좌우는 자동으로 가운데 정렬 */
   width: 500px;
   text-align: center; /* 내부 요소가 중앙에 배치되도록 설정 */
@@ -91,7 +89,7 @@ export default {
 }
 
 .icon-ID,
-.icon-Lock {
+.icon-Mail {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -104,7 +102,7 @@ export default {
   left: 10px; /* 왼쪽 아이콘 위치 */
 }
 
-.icon-Lock {
+.icon-Mail {
   left: 10px; /* 오른쪽 아이콘 위치 */
 }
 
