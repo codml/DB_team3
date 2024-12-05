@@ -164,8 +164,8 @@ exports.getLikeItems = (req, res, next) => {
 	});
 };
 
-exports.getReportList = (req, res, next) => {
-	console.log('Call getReportList');
+exports.getRpUserList = (req, res, next) => {
+	console.log('Call getRpUserList');
 	
 	const authHeader = req.headers['authorization']; // Authorization 헤더에서 토큰 추출
     if (!authHeader) {
@@ -183,7 +183,7 @@ exports.getReportList = (req, res, next) => {
 	// 유저 ID 추출
 	userID = decoded.userID;
 
-	mypageModel.getReportList((status, reports) => {
+	mypageModel.getRpUserList((status, reports) => {
 		if(status === 'success'){
 			return res.status(200).json({ message: 'Loading user information success', reports: reports });
 		}
@@ -209,3 +209,32 @@ exports.getRpUser = (req, res, next) => {
 	});
 };
 
+// 신고 당한 유저의 글
+exports.getRpList = (req, res, next) => {
+	console.log('Call getRpList');
+	
+	const userId = req.headers.id;
+	console.log('userId: ' + userId);
+	mypageModel.getRpList(userId, (status, lists) => {
+		if(status === 'success'){
+			return res.status(200).json({ message: 'Loading user information success', lists: lists });
+		}
+		else
+			return res.status(401).json({ message: status });
+	});
+};
+
+// 신고 당한 유저 밴하기
+exports.banUser = (req, res, next) => {
+	console.log('Call banUser');
+	
+	const userId = req.body.Id; // 요청 본문 데이터
+	console.log('userId: ' + userId);
+	mypageModel.banUser(userId, (status) => {
+		if(status === 'success'){
+			return res.status(200).json({ message: 'To ban user success'});
+		}
+		else
+			return res.status(401).json({ message: status });
+	});
+};

@@ -58,9 +58,13 @@ router.get('/mypage/purchase', mypageController.getPurchaseItems);
 //	찜목록
 router.get('/mypage/like', mypageController.getLikeItems);
 //	관리자페이지
-router.get('/mypage/manage', mypageController.getReportList);
+router.get('/mypage/manage', mypageController.getRpUserList);
 //	신고당한 유저 정보 가져오기
 router.get('/mypage/manage/detail', mypageController.getRpUser);
+//	신고당한 유저 글 가져오기
+router.get('/mypage/manage/list', mypageController.getRpList);
+//	신고당한 유저 밴하기
+router.delete('/mypage/manage/ban', mypageController.banUser);
 
 //  지도 API - 회원 주변의 상품 검색
 router.post('/map', mapController.getUserLocation);

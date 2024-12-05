@@ -116,14 +116,13 @@ exports.getLikeItems = (userID, callback) => {
 	  });
 };
 
-
-exports.getReportList = (callback) => {
-	console.log('Call getReportList');
+// 신고당한 유저 리스트 불러오기
+exports.getRpUserList = (callback) => {
+	console.log('Call getRpUserList');
 	var sql = ' \
 				SELECT Id, Rp_cnt, Avg_rating \
-				FROM usr NATURAL JOIN (SELECT Uid AS Id, COUNT(*) AS Rp_cnt \
-										FROM report JOIN item_datas USING (Ino) \
-										GROUP BY Uid) AS new_report \
+				FROM usr \
+				WHERE Rp_cnt > 0 \
 				ORDER BY Rp_cnt DESC; \
 			';
 	connection.query(sql, (err, rows) => {
@@ -134,7 +133,7 @@ exports.getReportList = (callback) => {
         }
 
         if (rows.length === 0) {
-            console.log("찜한상품이 존재하지 않음");
+            console.log("신고가 존재하지 않음");
             callback('Item not exists');
             return;
         }
@@ -163,5 +162,56 @@ exports.getRpUser = (userId, callback) => {
             return;
         }
 		callback('success', rows[0]); // 성공 시 사용자 데이터 반환
+	  });
+};
+
+// 신고당한 유저 글 불러오기
+exports.getRpList = (userId, callback) => {
+	console.log('Call getRpList');
+	var sql = ' \
+				SELECT Ino, Title, Reg_date, Report_cnt \
+				FROM item_datas NATURAL JOIN (SELECT Ino, COUNT(*) AS Report_cnt \
+												FROM report JOIN item_datas USING (Ino) \
+												GROUP BY Ino) AS rp\
+				ORDER BY Report_cnt DESC \
+				LIMIT 5; \
+			';
+	connection.query(sql, [userId],(err, rows) => {
+		if (err) {
+            console.error("DB 오류 " + err.sqlMessage);
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("신고가 존재하지 않음");
+            callback('Item not exists');
+            return;
+        }
+		callback('success', rows); // 성공 시 사용자 데이터 반환
+	  });
+};
+
+// 신고 당한 유저 밴하기
+exports.banUser = (userId, callback) => {
+	console.log('Call banUser');
+	var sql = ' \
+				DELETE \
+				FROM usr \
+				WHERE Id = ? \
+			';
+	connection.query(sql, [userId], (err, rows) => {
+		if (err) {
+            console.error("DB 오류 " + err.sqlMessage);
+            callback('fail');
+            return;
+        }
+
+        if (rows.length === 0) {
+            console.log("해당유저가 존재하지 않음");
+            callback('user not exists');
+            return;
+        }
+		callback('success'); // 성공 시 사용자 데이터 반환
 	  });
 };

@@ -45,8 +45,9 @@
 								<p><strong>주소:</strong> {{ user.Address || '정보 없음' }}</p>
 							</div>
 						</div>
+						<button @click="banUser(user.Id); detail=false;">회원 탈퇴</button>
 					</section>
-					<table class="item-table">
+					<table v-if="!detail" class="item-table">
 						<thead>
 							<tr>
 								<th class="title-column">아이디</th>
@@ -55,16 +56,10 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-if="!reports">
-								<td class="item-title">신고가</td>
-								<td class="item-price">존재하지</td>
-								<td class="post-time">않습니다</td>
-							</tr>
-							<tr v-else
-								v-for="(report, index) in paginatedPosts"
+							<tr v-for="(report, index) in paginatedPosts"
 								:key="index"
 								:class="{ notice: report.Id !== null }" 
-								@click="getRpUser(report.Id)"
+								@click="getRpUser(report.Id); getRpList(report.Id);"
 							>
 								<td class="item-title">
 									<a href="#">
@@ -73,6 +68,30 @@
 								</td>
 								<td class="item-price">{{ report.Rp_cnt }}</td>
 								<td class="post-time">{{ report.Avg_rating }}</td>
+							</tr>
+						</tbody>
+					</table>
+					<table v-else class="item-table">
+						<thead>
+							<tr>
+								<th class="title-column">제목</th>
+								<th class="price-column">등록 날짜</th>
+								<th class="date-column">신고 횟수</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="(list, index) in lists"
+								:key="index"
+								:class="{ notice: user.Id !== null }"
+								@click="goToView(list.Ino)"
+							>
+								<td class="item-title">
+									<a href="#">
+										{{ list.Title }}
+									</a>
+								</td>
+								<td class="item-price">{{ formatDate(list.Reg_date) }}</td>
+								<td class="post-time">{{ list.Report_cnt }}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -109,8 +128,9 @@ export default {
 	data() {
 		return {
 			// 사용자 데이터 저장
-			reports: [],
-			user: [],
+			reports: [], // 신고 받은 유저 리스트
+			user: [], // 신고 받은 유저
+			lists: [], // 신고 받은 유저글
 			itemsPerPage: 5, // 페이지당 항목 수
 
 			detail: false,		// 사용자 상세정보
@@ -120,31 +140,7 @@ export default {
 	},
   
 	mounted() {
-		// Axios GET 요청
-		const token = localStorage.getItem('token'); // 토큰을 로컬 스토리지에서 가져오기
-
-		axios.get('http://localhost:3000/mypage/manage', {
-			headers: {
-				Authorization: `Bearer ${token}` // 인증 헤더 설정
-			}
-		})
-		.then(response => {
-			this.reports = response.data.reports; // 응답 데이터에서 사용자 정보 저장
-			console.log('reports: '+ JSON.stringify(this.reports));
-		})
-		.catch(err => {
-			console.error('Error fetching MyPage data:', err);
-			if(err.response.data.message === 'Item not exists')
-				this.error = null;
-			else if (err.response && err.response.data) {
-				this.error = err.response.data.message || 'Failed to load data';
-			} else {
-				this.error = 'An unexpected error occurred';
-			}
-		})
-		.finally(() => {
-			this.loading = false; // 로딩 상태 종료
-		});
+		this.getRpUserList();
 	},
 
 	computed: {
@@ -189,6 +185,34 @@ export default {
 			}
 		},
 
+		getRpUserList() {
+			// Axios GET 요청
+			const token = localStorage.getItem('token'); // 토큰을 로컬 스토리지에서 가져오기
+
+			axios.get('http://localhost:3000/mypage/manage', {
+				headers: {
+					Authorization: `Bearer ${token}` // 인증 헤더 설정
+				}
+			})
+			.then(response => {
+				this.reports = response.data.reports; // 응답 데이터에서 사용자 정보 저장
+				console.log('reports: '+ JSON.stringify(this.reports));
+			})
+			.catch(err => {
+				console.error('Error fetching MyPage data:', err);
+				if(err.response.data.message === 'Item not exists')
+					this.error = null;
+				else if (err.response && err.response.data) {
+					this.error = err.response.data.message || 'Failed to load data';
+				} else {
+					this.error = 'An unexpected error occurred';
+				}
+			})
+			.finally(() => {
+				this.loading = false; // 로딩 상태 종료
+			});
+		},
+
 		getRpUser(Id) {			
 			axios.get('http://localhost:3000/mypage/manage/detail', {
 				headers: {
@@ -212,6 +236,51 @@ export default {
 			.finally(() => {
 				this.detail = true;
 			})
+		},
+
+		getRpList(Id) {			
+			axios.get('http://localhost:3000/mypage/manage/list', {
+				headers: {
+					Id: Id // 인증 헤더 설정
+				}
+			})
+			.then(response => {
+				this.lists = response.data.lists; // 응답 데이터에서 사용자 정보 저장
+				console.log('lists: '+ JSON.stringify(this.lists));
+			})
+			.catch(err => {
+				console.error('Error fetching MyPage data:', err);
+				if(err.response.data.message === 'Item not exists')
+					this.error = null;
+				else if (err.response && err.response.data) {
+					this.error = err.response.data.message || 'Failed to load data';
+				} else {
+					this.error = 'An unexpected error occurred';
+				}
+			})
+			.finally(() => {
+				this.detail = true;
+			})
+		},
+
+		async banUser(Id) {			
+			try {
+				const response = await axios.delete('http://localhost:3000/mypage/manage/ban', {
+					data: { Id: Id }, // 삭제 시 추가로 전송할 데이터
+				});
+				console.log('삭제 성공:', response.data);
+				alert('삭제 성공');
+			} catch (error) {
+				console.error('삭제 실패:', error);
+				alert('삭제 실패');
+			}
+		},
+
+		goToView(Ino) {
+			this.$router.push({
+				name: "read",
+				params: { ino: Ino }
+			});
 		}
 	}
 };
