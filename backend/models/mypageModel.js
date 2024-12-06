@@ -38,8 +38,8 @@ exports.modifyUser = (userData, callback) => {
 		sqldata = [userData.Uname, userData.Age, userData.Sex, userData.Phone, userData.Email, userData.Address, userData.Passwd, userData.Nickname, userData.Profile_image, userData.Id];	
 	}else{
 		sql = "UPDATE usr SET Uname = ?, Age = ?, Sex = ?, Phone = ?, Email = ?, Address = ?, Passwd = ?, Nickname = ? WHERE id = ?";
+		sqldata = [userData.Uname, userData.Age, userData.Sex, userData.Phone, userData.Email, userData.Address, userData.Passwd, userData.Nickname, userData.Id];
 	}
-	sqldata = [userData.Uname, userData.Age, userData.Sex, userData.Phone, userData.Email, userData.Address, userData.Passwd, userData.Nickname, userData.Id];
 	connection.query(sql, sqldata, (err, rows) => {
 		if (err) {
 		  console.error('sql error message: ' + err.sqlMessage);
@@ -173,6 +173,7 @@ exports.getRpList = (userId, callback) => {
 				FROM item_datas NATURAL JOIN (SELECT Ino, COUNT(*) AS Report_cnt \
 												FROM report JOIN item_datas USING (Ino) \
 												GROUP BY Ino) AS rp\
+				WHERE Uid = ? \
 				ORDER BY Report_cnt DESC \
 				LIMIT 5; \
 			';
