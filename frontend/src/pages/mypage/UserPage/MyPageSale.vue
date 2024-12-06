@@ -101,7 +101,7 @@ export default {
 		return {
 			// 사용자 데이터 저장
 			items: [],
-			itemsPerPage: 10, // 페이지당 항목 수
+			itemsPerPage: 5, // 페이지당 항목 수
 
 			loading: true,      // 로딩 상태
 			error: null         // 에러 메시지
@@ -109,31 +109,7 @@ export default {
 	},
   
 	mounted() {
-		// Axios GET 요청
-		const token = localStorage.getItem('token'); // 토큰을 로컬 스토리지에서 가져오기
-
-		axios.get('http://localhost:3000/mypage/sale', {
-			headers: {
-				Authorization: `Bearer ${token}` // 인증 헤더 설정
-			}
-		})
-		.then(response => {
-			this.items = response.data.items; // 응답 데이터에서 사용자 정보 저장
-			console.log('items: '+ JSON.stringify(this.items));
-		})
-		.catch(err => {
-			console.error('Error fetching MyPage data:', err);
-			if(err.response.data.message === 'Item not exists')
-				this.error = null;
-			else if (err.response && err.response.data) {
-				this.error = err.response.data.message || 'Failed to load data';
-			} else {
-				this.error = 'An unexpected error occurred';
-			}
-		})
-		.finally(() => {
-			this.loading = false; // 로딩 상태 종료
-		});
+		this.fetchPosts();
 	},
 
 	computed: {
@@ -159,6 +135,34 @@ export default {
 	},
 
 	methods:{
+		fetchPosts() {
+			// Axios GET 요청
+			const token = localStorage.getItem('token'); // 토큰을 로컬 스토리지에서 가져오기
+
+			axios.get('http://localhost:3000/mypage/sale', {
+				headers: {
+					Authorization: `Bearer ${token}` // 인증 헤더 설정
+				}
+			})
+			.then(response => {
+				this.items = response.data.items; // 응답 데이터에서 사용자 정보 저장
+				console.log('items: '+ JSON.stringify(this.items));
+			})
+			.catch(err => {
+				console.error('Error fetching MyPage data:', err);
+				if(err.response.data.message === 'Item not exists')
+					this.error = null;
+				else if (err.response && err.response.data) {
+					this.error = err.response.data.message || 'Failed to load data';
+				} else {
+					this.error = 'An unexpected error occurred';
+				}
+			})
+			.finally(() => {
+				this.loading = false; // 로딩 상태 종료
+			});
+		},
+
 		formatDate(dateString) {
 			if (!dateString) return "N/A";
 			const date = new Date(dateString);
@@ -191,7 +195,10 @@ export default {
 				params: { ino: item.Ino }
 			});
 		},
-	}
+	},
+	created() {
+		this.fetchPosts();
+	},
 };
 </script>
 

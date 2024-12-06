@@ -100,7 +100,7 @@ export default {
 		return {
 			// 사용자 데이터 저장
 			items: [],
-			itemsPerPage: 10, // 페이지당 항목 수
+			itemsPerPage: 5, // 페이지당 항목 수
 
 			loading: true,      // 로딩 상태
 			error: null         // 에러 메시지

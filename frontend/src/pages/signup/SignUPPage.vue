@@ -23,7 +23,7 @@
       </div>
       <div class="information">
          <label for="input5">이메일</label><br>
-         <input v-model="form.email" id="input5" name="email" type="text" required/>
+         <input v-model="form.email" id="input5" name="email" type="email" required/>
       </div>
       <div class="information">
          <label for="input6">주소</label><br>
