@@ -4,16 +4,6 @@
     <div v-else id="app">
         <!-- 메인 섹션 -->
         <main class="main-content">
-            <!-- 마이페이지 메뉴 -->
-            <aside class="sidebar">
-                <ul>
-                    <li @click="$router.push('/mypage')">나의 정보 보기</li>
-                    <li @click="$router.push('/mypage/sale')">나의 판매 내역</li>
-                    <li @click="$router.push('/mypage/purchase')">나의 구매 내역</li>
-                    <li @click="$router.push('/mypage/like')">내가 찜한 상품</li>
-                </ul>
-            </aside>
-
             <!-- 프로필과 내가 판매한 상품을 상하로 배치 -->
             <div class="profile-and-products">
 				<!-- 사용자 상세정보 -->
@@ -45,7 +35,7 @@
 								<p><strong>주소:</strong> {{ user.Address || '정보 없음' }}</p>
 							</div>
 						</div>
-						<button @click="banUser(user.Id); detail=false;">회원 탈퇴</button>
+						<button @click="banUser(user.Id); getRpUserList();detail=false;">회원 탈퇴</button>
 					</section>
 					<table v-if="!detail" class="item-table">
 						<thead>

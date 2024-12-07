@@ -27,6 +27,7 @@ const routes = [
   {
     path: '/mypage/sale/page_:page',
     name: 'mysale',
+	props: true,
     component: () => import('../pages/mypage/UserPage/MyPageSale.vue')
   },
   {
@@ -36,6 +37,7 @@ const routes = [
   {
     path: '/mypage/purchase/page_:page',
     name: 'mypurchase',
+	props: true,
     component: () => import('../pages/mypage/UserPage/MyPagePurchase.vue')
   },
   {
@@ -45,6 +47,7 @@ const routes = [
   {
     path: '/mypage/like/page_:page',
     name: 'mylike',
+	props: true,
     component: () => import('../pages/mypage/UserPage/MyPageLike.vue')
   },
   {
