@@ -26,7 +26,7 @@ exports.searchItems = (req, callback) => {
         queryParams.push(req.subCategory);
     }
 
-    if (req.priceFrom && req.priceTo && req.priceFrom <= req.priceTo) {
+    if (req.priceFrom && req.priceTo && parseInt(req.priceFrom) <= parseInt(req.priceTo)) {
         query += ` AND (Price BETWEEN ? AND ?)`;
         queryParams.push(req.priceFrom);
         queryParams.push(req.priceTo);
